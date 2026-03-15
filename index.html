@@ -184,14 +184,24 @@
 
         /* --- Logo Styles --- */
         .brand-logo {
-            font-weight: 700;
-            font-size: 1.5rem;
+            font-weight: 800;
+            font-size: 3.5rem;
             color: var(--primary-navy);
-            letter-spacing: 1px;
-            line-height: 1.1;
+            letter-spacing: -1.5px;
+            line-height: 0.85;
+            margin-top: 5px;
         }
 
-        .brand-logo span { color: var(--accent-gold); }
+        .brand-logo .dot { color: var(--accent-gold); }
+
+        .brand-logo .subtext {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: #666;
+            margin-top: 6px;
+        }
 
         .schedule-info { text-align: right; }
         
@@ -403,7 +413,7 @@
 
     <div class="schedule-wrapper" id="capture-area">
         <header>
-            <div class="brand-logo">GENIUS<span>.</span><br><span style="font-size:0.7rem; font-weight:600; letter-spacing:0; color:#666;">PREMIUM TUITION</span></div>
+            <div class="brand-logo">GENIUS<span class="dot">.</span><span class="subtext">PREMIUM TUITION</span></div>
 
             <div style="display: flex; flex-direction: column; align-items: flex-end;">
                 <!-- Sync / Auth controls -->
