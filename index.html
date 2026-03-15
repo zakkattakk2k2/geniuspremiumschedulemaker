@@ -182,56 +182,16 @@
             margin-bottom: 20px;
         }
 
-        /* --- Native Logo Styles --- */
+        /* --- Logo Styles --- */
         .brand-logo {
-            display: inline-flex;
-            flex-direction: column;
-            color: #12a8e0;
-            line-height: 1;
-            margin-bottom: 5px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-navy);
+            letter-spacing: 1px;
+            line-height: 1.1;
         }
-        .logo-top {
-            display: flex;
-            align-items: flex-end;
-            font-size: 58px;
-            font-weight: 800;
-            letter-spacing: -1.5px;
-            margin-bottom: 4px;
-        }
-        .logo-letter { line-height: 0.75; }
-        .logo-e-mark {
-            display: inline-flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            width: 36px;
-            height: 44px;
-            margin: 0 4px 3px 5px;
-            position: relative;
-        }
-        .e-bar {
-            background-color: #12a8e0;
-            height: 8px;
-            margin-bottom: 5px;
-            border-radius: 1px;
-        }
-        .e-bar.top { width: 28px; }
-        .e-bar.mid { width: 22px; }
-        .e-bar.bot { width: 36px; margin-bottom: 0; }
-        .e-swoosh {
-            position: absolute;
-            bottom: -15px;
-            left: -20px;
-            width: 65px;
-            height: 22px;
-            pointer-events: none;
-        }
-        .logo-bottom {
-            text-align: right;
-            font-size: 14px;
-            font-weight: 300;
-            letter-spacing: 1.2px;
-            padding-right: 4px;
-        }
+
+        .brand-logo span { color: var(--accent-gold); }
 
         .schedule-info { text-align: right; }
         
@@ -443,21 +403,7 @@
 
     <div class="schedule-wrapper" id="capture-area">
         <header>
-            <div class="brand-logo">
-                <div class="logo-top">
-                    <span class="logo-letter">G</span>
-                    <span class="logo-e-mark">
-                        <span class="e-bar top"></span>
-                        <span class="e-bar mid"></span>
-                        <span class="e-bar bot"></span>
-                        <svg class="e-swoosh" viewBox="0 0 100 40">
-                            <path d="M 15,35 Q 50,0 95,15 Q 60,25 0,40 Z" fill="#12a8e0"/>
-                        </svg>
-                    </span>
-                    <span class="logo-letter">NIUS</span>
-                </div>
-                <div class="logo-bottom">PREMIUM TUITION</div>
-            </div>
+            <div class="brand-logo">GENIUS<span>.</span><br><span style="font-size:0.7rem; font-weight:600; letter-spacing:0; color:#666;">PREMIUM TUITION</span></div>
 
             <div style="display: flex; flex-direction: column; align-items: flex-end;">
                 <!-- Sync / Auth controls -->
@@ -522,6 +468,14 @@
             
             <label>Tutor Name</label>
             <input type="text" id="mTutor" placeholder="e.g. Dean Cook">
+
+            <label>Location</label>
+            <input type="text" id="mLocation" list="locationOptions" placeholder="Select or type a location...">
+            <datalist id="locationOptions">
+                <option value="Online"></option>
+                <option value="At Home"></option>
+                <option value="Genius Centre"></option>
+            </datalist>
             
             <label>Duration</label>
             <select id="mDuration">
@@ -957,6 +911,7 @@
             document.getElementById('mMinSelect').value = m;
             document.getElementById('mSubject').value = '';
             document.getElementById('mTutor').value = '';
+            document.getElementById('mLocation').value = '';
             document.getElementById('mDuration').value = '4'; 
             setColorInModal('c-blue'); 
             modal.style.display = 'flex';
@@ -989,7 +944,8 @@
             document.getElementById('mHourSelect').value = ev.startHourVal;
             document.getElementById('mMinSelect').value = ev.startMinVal;
             document.getElementById('mSubject').value = ev.subject;
-            document.getElementById('mTutor').value = ev.tutor;
+            document.getElementById('mTutor').value = ev.tutor || '';
+            document.getElementById('mLocation').value = ev.location || '';
             document.getElementById('mDuration').value = ev.duration;
             setColorInModal(ev.colorClass || 'c-blue');
 
@@ -1004,7 +960,8 @@
             let m = parseInt(document.getElementById('mMinSelect').value);
             let durBlocks = parseInt(document.getElementById('mDuration').value); 
             let subj = document.getElementById('mSubject').value || 'Lesson';
-            let tut = document.getElementById('mTutor').value || 'Genius Tutor';
+            let tut = document.getElementById('mTutor').value.trim();
+            let loc = document.getElementById('mLocation').value.trim();
             let color = document.getElementById('mColor').value;
 
             if (editingEventId) {
@@ -1021,6 +978,7 @@
                             groupId: groupIdToEdit, 
                             subject: subj,
                             tutor: tut,
+                            location: loc,
                             duration: durBlocks,
                             col: i,
                             startHourVal: h,
@@ -1039,6 +997,7 @@
                             groupId: newGroupId, 
                             subject: subj,
                             tutor: tut,
+                            location: loc,
                             duration: durBlocks,
                             col: i,
                             startHourVal: h,
@@ -1080,12 +1039,18 @@
                 
                 let contentHTML = `<span class="event-delete" onclick="deleteEvent('${ev.id}'); event.stopPropagation();">×</span>`;
                 
+                let tutorHTML = ev.tutor ? `<span>${ev.tutor}</span>` : '';
+                let locHTML = ev.location ? `<span style="font-style: italic; opacity: 0.9;">${ev.location}</span>` : '';
+
                 if(ev.duration > 1) {
-                    contentHTML += `<strong>${ev.subject}</strong><span>${ev.tutor}</span><span class="event-time">${timeStr}</span>`;
+                    contentHTML += `<strong>${ev.subject}</strong>${tutorHTML}${locHTML}<span class="event-time">${timeStr}</span>`;
                 } else {
+                    let tutorPipe = ev.tutor ? `<span>| ${ev.tutor}</span>` : '';
+                    let locPipe = ev.location ? `<span style="font-style: italic;">| ${ev.location}</span>` : '';
                     contentHTML += `<div class="event-content-wrapper">
                                         <strong>${ev.subject}</strong>
-                                        <span>| ${ev.tutor}</span>
+                                        ${tutorPipe}
+                                        ${locPipe}
                                         <span>| ${timeStr}</span>
                                     </div>`;
                 }
