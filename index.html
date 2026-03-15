@@ -167,7 +167,7 @@
         header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
+            align-items: flex-start;
             border-bottom: 2px solid var(--primary-navy);
             padding-bottom: 15px;
             margin-bottom: 20px;
@@ -177,7 +177,7 @@
         .brand-logo {
             display: inline-flex;
             flex-direction: column;
-            color: #12a8e0; /* Exact blue from your image */
+            color: #12a8e0;
             line-height: 1;
             margin-bottom: 5px;
         }
@@ -239,6 +239,14 @@
             color: #666;
         }
 
+        .auth-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            justify-content: flex-end;
+        }
+
         /* --- The Grid --- */
         .grid {
             display: grid;
@@ -293,14 +301,14 @@
             justify-content: flex-start;
             line-height: 1.3;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            color: white; /* Changed for solid colors */
+            color: white;
             z-index: 10;
             position: relative;
             cursor: grab;
             transition: opacity 0.2s;
         }
         .event:active { cursor: grabbing; }
-        .event * { pointer-events: none; } /* Prevents drag glitching */
+        .event * { pointer-events: none; } 
 
         .event strong { display: block; font-size: 0.85rem; margin-bottom: 2px; }
         
@@ -308,11 +316,10 @@
             margin-top: auto;
             font-size: 0.7rem;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.85); /* Changed for solid colors */
+            color: rgba(255, 255, 255, 0.85); 
             padding-top: 4px;
         }
 
-        /* 15 Minute Event Special Formatting */
         .event.event-15min {
             flex-direction: row;
             align-items: center;
@@ -326,14 +333,8 @@
             width: 100%;
             overflow: hidden;
         }
-        .event.event-15min strong { 
-            margin-bottom: 0; 
-            font-size: 0.75rem; 
-        }
-        .event.event-15min span {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.85); /* Changed for solid colors */
-        }
+        .event.event-15min strong { margin-bottom: 0; font-size: 0.75rem; }
+        .event.event-15min span { font-size: 0.7rem; color: rgba(255, 255, 255, 0.85); }
         
         .event-delete {
             position: absolute;
@@ -341,16 +342,15 @@
             cursor: pointer;
             font-weight: bold;
             display: none;
-            background: rgba(0, 0, 0, 0.25); /* Changed for solid colors */
+            background: rgba(0, 0, 0, 0.25); 
             color: white;
             border-radius: 50%;
             padding: 0 4px;
-            pointer-events: auto !important; /* Keep clickable */
+            pointer-events: auto !important; 
         }
         .event:hover .event-delete { display: block; }
-        .event-15min:hover .event-delete { top: 0px; right: 2px; } /* Adjust for tight space */
+        .event-15min:hover .event-delete { top: 0px; right: 2px; } 
 
-        /* Solid Color Palette */
         .c-blue   { background-color: #2196F3; border-left: 3px solid #0D47A1; }
         .c-green  { background-color: #4CAF50; border-left: 3px solid #1B5E20; }
         .c-red    { background-color: #F44336; border-left: 3px solid #B71C1C; }
@@ -359,17 +359,13 @@
         .c-mint   { background-color: #00BFA5; border-left: 3px solid #004D40; }
         .c-rose   { background-color: #E91E63; border-left: 3px solid #880E4F; }
         .c-gray   { background-color: #78909C; border-left: 3px solid #263238; }
-        
-        /* New Solid Colors */
         .c-orange { background-color: #FF9800; border-left: 3px solid #E65100; }
         .c-indigo { background-color: #3F51B5; border-left: 3px solid #1A237E; }
-
-        /* Yellow needs dark text for readability */
         .c-yellow { background-color: #FFEB3B; border-left: 3px solid #F57F17; color: #333; }
         .c-yellow .event-time, .c-yellow span { color: #555; }
         .c-yellow .event-delete { background: rgba(0,0,0,0.1); color: #333; }
 
-        /* --- Modal --- */
+        /* --- Modals --- */
         .modal-overlay {
             display: none; position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -392,30 +388,21 @@
         .time-selectors { display: flex; gap: 10px; margin-bottom: 15px; }
         .time-selectors select { width: 50%; margin-bottom: 0;}
         
-        .day-checkboxes {
-            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;
-        }
+        .day-checkboxes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .day-checkboxes label {
             background: #f1f4f8; padding: 6px 10px; border-radius: 4px; 
             font-size: 0.8rem; cursor: pointer; border: 1px solid #ccc;
             font-weight: 400; display: flex; align-items: center; gap: 4px;
         }
-        .day-checkboxes input:checked + label {
-            background: var(--primary-navy); color: white; border-color: var(--primary-navy);
-        }
+        .day-checkboxes input:checked + label { background: var(--primary-navy); color: white; border-color: var(--primary-navy); }
 
-        /* Color Picker Styles */
         .color-picker-wrapper { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
         .color-swatch {
             width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
             border: 2px solid transparent; transition: transform 0.2s;
         }
         .color-swatch:hover { transform: scale(1.15); }
-        .color-swatch.active { 
-            border-color: var(--primary-navy); 
-            transform: scale(1.15); 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3); 
-        }
+        .color-swatch.active { border-color: var(--primary-navy); transform: scale(1.15); box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
     </style>
 </head>
@@ -448,7 +435,6 @@
 
     <div class="schedule-wrapper" id="capture-area">
         <header>
-            <!-- Native Code Replica of the Logo -->
             <div class="brand-logo">
                 <div class="logo-top">
                     <span class="logo-letter">G</span>
@@ -465,14 +451,23 @@
                 <div class="logo-bottom">PREMIUM TUITION</div>
             </div>
 
-            <div class="schedule-info">
-                <h1 id="outName">Student Schedule</h1>
-                <p id="outDate">Week Commencing: ---</p>
+            <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                <!-- Sync / Auth controls -->
+                <div class="auth-container" data-html2canvas-ignore="true">
+                    <span id="userStatus" style="font-size: 0.8rem; font-weight: 600; color: #666;">Offline Mode (Local)</span>
+                    <button id="auth-btn" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent-gold); color: #fff;">Login to Cloud Sync</button>
+                </div>
+
+                <div class="schedule-info">
+                    <h1 id="outName">Student Schedule</h1>
+                    <p id="outDate">Week Commencing: ---</p>
+                </div>
             </div>
         </header>
         <div class="grid" id="scheduleGrid"></div>
     </div>
 
+    <!-- Event Modal -->
     <div class="modal-overlay" id="eventModal">
         <div class="modal">
             <h3 id="modalTitle">Add Lesson</h3>
@@ -553,7 +548,55 @@
         </div>
     </div>
 
-    <script>
+    <!-- Custom Dialog / Alert Modal -->
+    <div class="modal-overlay" id="dialogModal" style="z-index: 2000;">
+        <div class="modal" style="text-align: center;">
+            <h3 id="dialogTitle">Confirm</h3>
+            <p id="dialogMessage" style="margin-bottom: 20px; color: #555;"></p>
+            <div class="btn-group" style="justify-content: center;">
+                <button id="dialogCancel" style="background:#ccc; color:#333;">Cancel</button>
+                <button id="dialogConfirm" class="btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // HOW TO SET UP GITHUB FIREBASE CONFIG:
+        // 1. Go to console.firebase.google.com and create a free project.
+        // 2. Click the "Web" icon (</>) to add an app.
+        // 3. Copy the "firebaseConfig" block they give you and paste it below!
+        // 4. In Firebase Console, go to Authentication -> Sign-in method -> Enable "Google".
+        // 5. In Firebase Console, go to Firestore Database -> Create database -> Start in Test Mode.
+        // ==========================================
+        
+        const isCanvas = typeof __firebase_config !== 'undefined';
+        let firebaseConfig;
+
+        if (isCanvas) {
+            firebaseConfig = JSON.parse(__firebase_config);
+        } else {
+            // ---> REPLACE THIS WITH YOUR FIREBASE CONFIG <---
+            firebaseConfig = {
+                apiKey: "AIzaSyBvFSgHf04mEm8fBsfkc0umWv0J_UjB7j4",
+                authDomain: "schedulemaker-c212c.firebaseapp.com",
+                projectId: "schedulemaker-c212c",
+                storageBucket: "schedulemaker-c212c.firebasestorage.app",
+                messagingSenderId: "91220803760",
+                appId: "1:91220803760:web:f0ddb2a415a2f7394b3b75"
+            };
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'genius-schedules';
+        
+        let currentUser = null;
         const grid = document.getElementById('scheduleGrid');
         const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -561,27 +604,153 @@
         let editingEventId = null;
         let draggedEventId = null;
 
-        function initApp() {
-            populateTimeDropdowns();
+        // Ensure functions are globally accessible since we are in a JS Module
+        window.clearCurrentSchedule = clearCurrentSchedule;
+        window.exportSchedule = exportSchedule;
+        window.handleInputUpdate = handleInputUpdate;
+        window.handleTimeUpdate = handleTimeUpdate;
+        window.createNewTab = createNewTab;
+        window.switchTab = switchTab;
+        window.deleteTab = deleteTab;
+        window.openModalForAdd = openModalForAdd;
+        window.openModalForEdit = openModalForEdit;
+        window.closeModal = closeModal;
+        window.saveEvent = saveEvent;
+        window.deleteEvent = deleteEvent;
+        window.selectColor = selectColor;
+
+        // Custom Dialog System
+        function showDialog(title, message, isConfirm, callback) {
+            document.getElementById('dialogTitle').innerText = title;
+            document.getElementById('dialogMessage').innerText = message;
+            document.getElementById('dialogCancel').style.display = isConfirm ? 'inline-block' : 'none';
             
+            const confirmBtn = document.getElementById('dialogConfirm');
+            const cancelBtn = document.getElementById('dialogCancel');
+            
+            confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+            cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+            
+            document.getElementById('dialogConfirm').onclick = () => {
+                document.getElementById('dialogModal').style.display = 'none';
+                if(callback) callback(true);
+            };
+            document.getElementById('dialogCancel').onclick = () => {
+                document.getElementById('dialogModal').style.display = 'none';
+                if(callback) callback(false);
+            };
+            document.getElementById('dialogModal').style.display = 'flex';
+        }
+
+        // --- Authentication & Init ---
+        async function initAuth() {
+            if (isCanvas) {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            }
+        }
+        initAuth().catch(console.error);
+
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            const btn = document.getElementById('auth-btn');
+            const status = document.getElementById('userStatus');
+
+            if (user && user.isAnonymous === false) { // Real login
+                btn.innerText = "Logout";
+                btn.style.background = "#e74c3c";
+                status.innerText = `Synced securely as ${user.email ? user.email.split('@')[0] : 'User'}`;
+                btn.onclick = () => signOut(auth);
+                await loadCloudData(user);
+            } else if (user && isCanvas) { // Canvas preview environment login
+                btn.style.display = 'none';
+                status.innerText = `Cloud Sync Active (Canvas)`;
+                await loadCloudData(user);
+            } else { // GitHub page logged out
+                btn.innerText = "Login to Cloud Sync";
+                btn.style.background = "var(--accent-gold)";
+                status.innerText = "Offline Mode (Local)";
+                btn.onclick = () => {
+                    if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+                        showDialog("Setup Required", "Please open the HTML file and paste your Firebase Config keys to enable Cloud Sync on GitHub Pages.", false);
+                        return;
+                    }
+                    signInWithPopup(auth, new GoogleAuthProvider()).catch(err => {
+                        console.error(err);
+                        showDialog("Login Failed", "Could not connect to Google. Check Firebase Setup.", false);
+                    });
+                };
+                loadLocalData();
+            }
+        });
+
+        // --- Data Loading ---
+        function loadLocalData() {
+            populateTimeDropdowns();
             const savedData = localStorage.getItem('geniusSchedules_v6');
             if (savedData) {
                 appData = JSON.parse(savedData);
             } else {
-                const initialId = 'student_' + Date.now();
-                appData.students[initialId] = { name: 'New Student', date: '', startHour: 13, endHour: 20, events: [] };
-                appData.activeTab = initialId;
+                createInitialData();
             }
             renderTabs();
             loadActiveStudentData();
         }
 
-        function saveData() { localStorage.setItem('geniusSchedules_v6', JSON.stringify(appData)); }
+        async function loadCloudData(user) {
+            populateTimeDropdowns();
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'schedules', 'main');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    appData = docSnap.data();
+                } else {
+                    // First time logging in: copy local data up to the cloud!
+                    const savedData = localStorage.getItem('geniusSchedules_v6');
+                    if(savedData) appData = JSON.parse(savedData);
+                    else createInitialData();
+                    saveData(); // trigger cloud save
+                }
+            } catch (e) {
+                console.error("Cloud load error:", e);
+                createInitialData();
+            }
+            renderTabs();
+            loadActiveStudentData();
+        }
 
+        function createInitialData() {
+            const initialId = 'student_' + Date.now();
+            appData.students = {};
+            appData.students[initialId] = { name: 'New Student', date: '', startHour: 13, endHour: 20, events: [] };
+            appData.activeTab = initialId;
+        }
+
+        // --- Cloud Save ---
+        async function saveData() {
+            // Save locally for immediate offline access
+            localStorage.setItem('geniusSchedules_v6', JSON.stringify(appData));
+            
+            // Save to cloud if logged in
+            if (currentUser && currentUser.uid) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'schedules', 'main');
+                    await setDoc(docRef, appData);
+                    document.getElementById('userStatus').style.color = "var(--accent-gold)";
+                    setTimeout(() => { document.getElementById('userStatus').style.color = "#666"; }, 1000);
+                } catch (e) { console.error("Cloud save failed:", e); }
+            }
+        }
+
+        // --- Core App Functions ---
         function populateTimeDropdowns() {
             const startSel = document.getElementById('timeStart');
             const endSel = document.getElementById('timeEnd');
             const mHourSel = document.getElementById('mHourSelect');
+            startSel.innerHTML = ''; endSel.innerHTML = ''; mHourSel.innerHTML = ''; // prevent duplicates on reload
             
             for(let i = 4; i <= 23; i++) {
                 let timeStr = `${i.toString().padStart(2, '0')}h00`;
@@ -621,17 +790,17 @@
 
         function deleteTab(id, event) {
             event.stopPropagation();
-            if(!confirm("Are you sure you want to delete this student's schedule?")) return;
-            delete appData.students[id];
-            const remainingKeys = Object.keys(appData.students);
-            if (remainingKeys.length === 0) {
-                const newId = 'student_' + Date.now();
-                appData.students[newId] = { name: 'New Student', date: '', startHour: 13, endHour: 20, events: [] };
-                appData.activeTab = newId;
-            } else if (appData.activeTab === id) {
-                appData.activeTab = remainingKeys[0];
-            }
-            saveData(); renderTabs(); loadActiveStudentData();
+            showDialog("Delete Schedule", "Are you sure you want to delete this student's schedule?", true, (confirmed) => {
+                if(!confirmed) return;
+                delete appData.students[id];
+                const remainingKeys = Object.keys(appData.students);
+                if (remainingKeys.length === 0) {
+                    createInitialData();
+                } else if (appData.activeTab === id) {
+                    appData.activeTab = remainingKeys[0];
+                }
+                saveData(); renderTabs(); loadActiveStudentData();
+            });
         }
 
         function handleInputUpdate() {
@@ -644,7 +813,7 @@
             let s = parseInt(document.getElementById('timeStart').value);
             let e = parseInt(document.getElementById('timeEnd').value);
             if(s >= e) {
-                alert("Start time must be before End time.");
+                showDialog("Invalid Time", "Start time must be before End time.", false);
                 document.getElementById('timeStart').value = appData.students[appData.activeTab].startHour;
                 document.getElementById('timeEnd').value = appData.students[appData.activeTab].endHour;
                 return;
@@ -663,7 +832,6 @@
             updateCanvasHeaders(); drawEmptyGrid(); renderEvents();
         }
 
-        // --- Grid Generation ---
         function drawEmptyGrid() {
             grid.innerHTML = '';
             const data = appData.students[appData.activeTab];
@@ -702,7 +870,6 @@
 
                         cell.onclick = () => openModalForAdd(day + 2, h, m);
                         
-                        // Drag & Drop Handling
                         cell.ondragover = (e) => { e.preventDefault(); e.currentTarget.style.backgroundColor = '#e9eff5'; };
                         cell.ondragleave = (e) => { e.currentTarget.style.backgroundColor = ''; };
                         cell.ondrop = (e) => {
@@ -766,7 +933,7 @@
             document.getElementById('mSubject').value = '';
             document.getElementById('mTutor').value = '';
             document.getElementById('mDuration').value = '4'; 
-            setColorInModal('c-blue'); // Default
+            setColorInModal('c-blue'); 
             modal.style.display = 'flex';
         }
 
@@ -778,22 +945,17 @@
             document.getElementById('modalTitle').innerText = 'Edit Lesson';
             document.getElementById('saveBtn').innerText = 'Update Lesson(s)';
             
-            // Always show the checkbox wrapper, hide the single day dropdown
             document.getElementById('bulkDaysWrapper').style.display = 'block';
             document.getElementById('singleDayWrapper').style.display = 'none';
 
-            // Find the group ID (or fallback to the single event ID for older un-grouped events)
             const groupIdToEdit = ev.groupId || ev.id;
             
-            // Find all events belonging to this group
             const relatedEvents = appData.students[appData.activeTab].events.filter(x => 
                 x.groupId === groupIdToEdit || (!x.groupId && x.id === eventId)
             );
 
-            // Clear all checkboxes first
             for(let i=2; i<=8; i++) document.getElementById('chkDay'+i).checked = false;
 
-            // Check the boxes for the days these related events fall on
             relatedEvents.forEach(relatedEv => {
                 let chk = document.getElementById('chkDay' + relatedEv.col);
                 if(chk) chk.checked = true;
@@ -824,16 +986,14 @@
                 const evToEdit = data.events.find(x => x.id === editingEventId);
                 const groupIdToEdit = evToEdit.groupId || evToEdit.id;
 
-                // Remove all existing events in this group
                 data.events = data.events.filter(x => x.groupId !== groupIdToEdit && x.id !== editingEventId);
                 
-                // Re-add them based on the checked boxes so days can be added/removed
                 for(let i=2; i<=8; i++) {
                     let chk = document.getElementById('chkDay'+i);
                     if(chk.checked) {
                         data.events.push({
                             id: 'evt_' + Date.now() + '_' + i + '_' + Math.floor(Math.random() * 1000),
-                            groupId: groupIdToEdit, // Keep the same group ID
+                            groupId: groupIdToEdit, 
                             subject: subj,
                             tutor: tut,
                             duration: durBlocks,
@@ -845,7 +1005,7 @@
                     }
                 }
             } else {
-                let newGroupId = 'grp_' + Date.now(); // Assign a new group ID
+                let newGroupId = 'grp_' + Date.now(); 
                 for(let i=2; i<=8; i++) {
                     let chk = document.getElementById('chkDay'+i);
                     if(chk.checked) {
@@ -888,7 +1048,7 @@
 
                 let div = document.createElement('div');
                 div.className = `event ${ev.colorClass || 'c-blue'}`;
-                if(ev.duration === 1) div.classList.add('event-15min'); // Apply specific 15min styling
+                if(ev.duration === 1) div.classList.add('event-15min'); 
 
                 div.style.gridColumn = ev.col;
                 div.style.gridRow = `${rowOffset} / span ${ev.duration}`;
@@ -898,7 +1058,6 @@
                 if(ev.duration > 1) {
                     contentHTML += `<strong>${ev.subject}</strong><span>${ev.tutor}</span><span class="event-time">${timeStr}</span>`;
                 } else {
-                    // Flex row layout for 15-minute blocks
                     contentHTML += `<div class="event-content-wrapper">
                                         <strong>${ev.subject}</strong>
                                         <span>| ${ev.tutor}</span>
@@ -922,10 +1081,12 @@
         }
 
         function clearCurrentSchedule() {
-            if(confirm("Are you sure you want to clear all lessons for THIS student?")) {
-                appData.students[appData.activeTab].events = [];
-                saveData(); renderEvents();
-            }
+            showDialog("Clear Schedule", "Are you sure you want to clear all lessons for THIS student?", true, (confirmed) => {
+                if (confirmed) {
+                    appData.students[appData.activeTab].events = [];
+                    saveData(); renderEvents();
+                }
+            });
         }
 
         function exportSchedule() {
@@ -943,8 +1104,6 @@
                 deleteBtns.forEach(btn => btn.style.display = '');
             });
         }
-
-        window.onload = initApp;
     </script>
 </body>
 </html>
