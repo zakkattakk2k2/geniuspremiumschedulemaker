@@ -139,7 +139,41 @@
             font-size: 1rem;
         }
         
-        .input-group input[type="text"] { min-width: 200px; }
+        .input-group input[type="text"] { min-width: 180px; }
+
+        /* Custom Toggle Switch Styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary-navy); }
+        input:checked + .slider:before { transform: translateX(20px); }
 
         .btn-group {
             display: flex;
@@ -229,7 +263,7 @@
         /* --- The Grid --- */
         .grid {
             display: grid;
-            grid-template-columns: 60px repeat(7, 1fr);
+            /* grid-template-columns is now controlled dynamically in JS */
             border-top: 1px solid var(--grid-border);
             border-left: 1px solid var(--grid-border);
             position: relative;
@@ -405,6 +439,17 @@
             <label>End Time</label>
             <select id="timeEnd" onchange="handleTimeUpdate()"></select>
         </div>
+        <!-- Toggle for Weekends -->
+        <div class="input-group">
+            <label>Weekends</label>
+            <div style="height: 40px; display: flex; align-items: center;">
+                <label class="switch">
+                    <input type="checkbox" id="toggleWeekends" onchange="handleWeekendToggle()" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
         <div class="btn-group">
             <button class="btn-danger" onclick="clearCurrentSchedule()">Clear Week</button>
             <button class="btn-primary" onclick="exportSchedule()">Save / Export</button>
@@ -537,15 +582,6 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ==========================================
-        // HOW TO SET UP GITHUB FIREBASE CONFIG:
-        // 1. Go to console.firebase.google.com and create a free project.
-        // 2. Click the "Web" icon (</>) to add an app.
-        // 3. Copy the "firebaseConfig" block they give you and paste it below!
-        // 4. In Firebase Console, go to Authentication -> Sign-in method -> Enable "Google".
-        // 5. In Firebase Console, go to Firestore Database -> Create database -> Start in Test Mode.
-        // ==========================================
-        
         const isCanvas = typeof __firebase_config !== 'undefined';
         let firebaseConfig;
 
@@ -580,6 +616,7 @@
         window.exportSchedule = exportSchedule;
         window.handleInputUpdate = handleInputUpdate;
         window.handleTimeUpdate = handleTimeUpdate;
+        window.handleWeekendToggle = handleWeekendToggle;
         window.createNewTab = createNewTab;
         window.switchTab = switchTab;
         window.deleteTab = deleteTab;
@@ -630,7 +667,7 @@
             const btn = document.getElementById('auth-btn');
             const status = document.getElementById('userStatus');
 
-            if (user && user.isAnonymous === false) { // Real login
+            if (user && user.isAnonymous === false) { 
                 btn.innerText = "Logout";
                 btn.style.background = "#e74c3c";
                 status.innerText = `Synced securely as ${user.email ? user.email.split('@')[0] : 'User'}`;
@@ -638,11 +675,11 @@
                     signOut(auth).then(() => window.location.reload());
                 };
                 await loadCloudData(user);
-            } else if (user && isCanvas) { // Canvas preview environment login
+            } else if (user && isCanvas) { 
                 btn.style.display = 'none';
                 status.innerText = `Cloud Sync Active (Canvas)`;
                 await loadCloudData(user);
-            } else { // GitHub page logged out
+            } else { 
                 btn.innerText = "Login to Cloud Sync";
                 btn.style.background = "var(--accent-gold)";
                 status.innerText = "Offline Mode (Local)";
@@ -680,18 +717,15 @@
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     appData = docSnap.data();
-                    // Sync cloud truth back down to local storage
                     localStorage.setItem('geniusSchedules_v6', JSON.stringify(appData));
                 } else {
-                    // First time logging in: copy local data up to the cloud!
                     const savedData = localStorage.getItem('geniusSchedules_v6');
                     if(savedData) appData = JSON.parse(savedData);
                     else createInitialData();
-                    saveData(); // trigger cloud save
+                    saveData();
                 }
             } catch (e) {
                 console.error("Cloud load error:", e);
-                // CRITICAL FIX: Fall back to local storage instead of wiping data!
                 const savedData = localStorage.getItem('geniusSchedules_v6');
                 if (savedData) {
                     appData = JSON.parse(savedData);
@@ -706,16 +740,20 @@
         function createInitialData() {
             const initialId = 'student_' + Date.now();
             appData.students = {};
-            appData.students[initialId] = { name: 'New Student', date: '', startHour: 13, endHour: 20, events: [] };
+            appData.students[initialId] = { 
+                name: 'New Student', 
+                date: '', 
+                startHour: 13, 
+                endHour: 20, 
+                showWeekends: true, // Defaulting weekends to on
+                events: [] 
+            };
             appData.activeTab = initialId;
         }
 
         // --- Cloud Save ---
         async function saveData() {
-            // Save locally for immediate offline access
             localStorage.setItem('geniusSchedules_v6', JSON.stringify(appData));
-            
-            // Save to cloud if logged in
             if (currentUser && currentUser.uid) {
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'schedules', 'main');
@@ -739,7 +777,7 @@
             const startSel = document.getElementById('timeStart');
             const endSel = document.getElementById('timeEnd');
             const mHourSel = document.getElementById('mHourSelect');
-            startSel.innerHTML = ''; endSel.innerHTML = ''; mHourSel.innerHTML = ''; // prevent duplicates on reload
+            startSel.innerHTML = ''; endSel.innerHTML = ''; mHourSel.innerHTML = ''; 
             
             for(let i = 4; i <= 23; i++) {
                 let timeStr = `${i.toString().padStart(2, '0')}h00`;
@@ -773,7 +811,14 @@
             const newName = prompt("Enter Student Name:");
             if (newName === null) return;
             const newId = 'student_' + Date.now();
-            appData.students[newId] = { name: newName || 'New Student', date: '', startHour: 13, endHour: 20, events: [] };
+            appData.students[newId] = { 
+                name: newName || 'New Student', 
+                date: '', 
+                startHour: 13, 
+                endHour: 20, 
+                showWeekends: true,
+                events: [] 
+            };
             appData.activeTab = newId; saveData(); renderTabs(); loadActiveStudentData();
         }
 
@@ -812,12 +857,20 @@
             saveData(); drawEmptyGrid(); renderEvents();
         }
 
+        function handleWeekendToggle() {
+            appData.students[appData.activeTab].showWeekends = document.getElementById('toggleWeekends').checked;
+            saveData(); drawEmptyGrid(); renderEvents();
+        }
+
         function loadActiveStudentData() {
             const data = appData.students[appData.activeTab];
             document.getElementById('studentName').value = data.name;
             document.getElementById('weekDate').value = data.date;
             document.getElementById('timeStart').value = data.startHour || 6;
             document.getElementById('timeEnd').value = data.endHour || 20;
+            // Evaluates undefined state natively as true for backwards compatibility
+            document.getElementById('toggleWeekends').checked = data.showWeekends !== false; 
+            
             updateCanvasHeaders(); drawEmptyGrid(); renderEvents();
         }
 
@@ -826,17 +879,24 @@
             const data = appData.students[appData.activeTab];
             let sHour = data.startHour || 6;
             let eHour = data.endHour || 20;
+            let showWknd = data.showWeekends !== false; 
+            let numDays = showWknd ? 7 : 5;
+
+            // Dynamically set CSS Grid columns based on weekend presence
+            grid.style.gridTemplateColumns = `60px repeat(${numDays}, 1fr)`;
             
             let emptyHeader = document.createElement('div');
             emptyHeader.className = 'grid-header';
             emptyHeader.style.gridColumn = 1; emptyHeader.style.gridRow = 1;
             grid.appendChild(emptyHeader);
 
-            days.forEach((day, index) => {
+            for (let i = 0; i < numDays; i++) {
                 let d = document.createElement('div'); d.className = 'grid-header';
-                d.innerText = day; d.style.gridColumn = index + 2; d.style.gridRow = 1;
+                d.innerText = days[i]; 
+                d.style.gridColumn = i + 2; 
+                d.style.gridRow = 1;
                 grid.appendChild(d);
-            });
+            }
 
             for (let h = sHour; h <= eHour; h++) {
                 for (let m = 0; m < 60; m += 30) {
@@ -849,15 +909,17 @@
                     t.style.gridColumn = 1; t.style.gridRow = `${rowOffset} / span 2`; 
                     grid.appendChild(t);
 
-                    for (let day = 0; day < 7; day++) {
+                    for (let day = 0; day < numDays; day++) {
+                        let actualCol = day + 2; 
+
                         let cell = document.createElement('div'); cell.className = 'grid-cell';
-                        cell.style.gridColumn = day + 2; cell.style.gridRow = `${rowOffset} / span 2`; 
+                        cell.style.gridColumn = actualCol; cell.style.gridRow = `${rowOffset} / span 2`; 
                         
-                        cell.dataset.day = day + 2;
+                        cell.dataset.day = actualCol;
                         cell.dataset.h = h;
                         cell.dataset.m = m;
 
-                        cell.onclick = () => openModalForAdd(day + 2, h, m);
+                        cell.onclick = () => openModalForAdd(actualCol, h, m);
                         
                         cell.ondragover = (e) => { e.preventDefault(); e.currentTarget.style.backgroundColor = '#e9eff5'; };
                         cell.ondragleave = (e) => { e.currentTarget.style.backgroundColor = ''; };
@@ -1029,8 +1091,12 @@
             document.querySelectorAll('.event').forEach(e => e.remove());
             const data = appData.students[appData.activeTab];
             let sHour = data.startHour || 6;
+            let showWknd = data.showWeekends !== false;
             
             data.events.forEach(ev => {
+                // If weekend toggle is disabled and this is a weekend event (cols 7 and 8), don't draw it.
+                if (!showWknd && ev.col > 6) return;
+
                 let rowOffset = (ev.startHourVal - sHour) * 4 + (ev.startMinVal / 15) + 2;
                 if(rowOffset < 2) return; 
 
