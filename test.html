@@ -1028,11 +1028,11 @@
             let endM = ev.endMinVal !== undefined ? ev.endMinVal : (ev.startHourVal * 60 + ev.startMinVal + ev.duration * 15) % 60;
             let endStr = endH.toString().padStart(2, '0') + 'h' + endM.toString().padStart(2, '0');
 
-            document.getElementById('mStartTime').value = '';
+            document.getElementById('mStartTime').value = startStr;
             document.getElementById('mStartTime').placeholder = 'e.g. ' + startStr;
             document.getElementById('mStartTime').dataset.default = startStr;
             
-            document.getElementById('mEndTime').value = '';
+            document.getElementById('mEndTime').value = endStr;
             document.getElementById('mEndTime').placeholder = 'e.g. ' + endStr;
             document.getElementById('mEndTime').dataset.default = endStr;
 
