@@ -1461,27 +1461,23 @@
 
             fetch(scriptUrl, {
                 method: 'POST',
-                // Removed 'mode: no-cors' to allow reading the response from Google
-                // Using text/plain bypasses the strict CORS preflight check 
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                mode: 'no-cors', 
+                headers: { 
+                    // Crucial: Must be text/plain so the browser skips the OPTIONS preflight request that Google blocks
+                    'Content-Type': 'text/plain;charset=utf-8' 
+                },
                 body: JSON.stringify(payload)
             })
-            .then(response => response.json())
-            .then(data => {
+            .then(() => {
+                // With no-cors, we assume success if the browser successfully dispatched the request
                 addBtn.disabled = false;
-                if (data.status === 'success') {
-                    statusText.innerText = "Sent ✓";
-                    statusText.style.color = "#27ae60"; // Green
-                    setTimeout(() => { statusText.innerText = ""; }, 3000);
-                } else {
-                    statusText.innerText = "Failed ❌";
-                    statusText.style.color = "#c0392b"; // Red
-                    console.error("Apps Script Error:", data.message);
-                }
+                statusText.innerText = "Sent ✓";
+                statusText.style.color = "#27ae60"; // Green
+                setTimeout(() => { statusText.innerText = ""; }, 3000);
             })
             .catch(err => {
                 addBtn.disabled = false;
-                statusText.innerText = "Network Error ❌";
+                statusText.innerText = "Failed ❌";
                 statusText.style.color = "#c0392b"; // Red
                 console.error("Email request failed:", err);
             });
