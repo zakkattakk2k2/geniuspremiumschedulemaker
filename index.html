@@ -1443,7 +1443,7 @@
                 await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'schedules', 'main'), personalData);
             }
 
-            // --- Send Email via Google Apps Script (GET Method) ---
+            // --- Send Email via Google Apps Script (GET Method in Background) ---
             const scriptUrl = "https://script.google.com/macros/s/AKfycbxl43NkR69YuoQGh-vSF5j6-MBVb2wF1CTx9_yaL62KI1DJPA8kTbi1vuXGXuzBUmgsWw/exec";
             const scheduleLink = window.location.origin + window.location.pathname + "?shared=" + activeId;
             
@@ -1455,21 +1455,27 @@
 
             const statusText = document.getElementById('emailStatus');
             const addBtn = document.getElementById('shareAddBtn');
-            statusText.innerText = "Opening secure tab...";
+            statusText.innerText = "Sending...";
             statusText.style.color = "#f39c12"; // Warning orange/yellow
             addBtn.disabled = true;
 
-            // Open a new tab to force the Google Workspace login firewall
-            window.open(urlWithData.toString(), '_blank');
-            
-            // Reset the UI button and show success
-            setTimeout(() => { 
+            // Send a silent GET request in the background
+            fetch(urlWithData.toString(), {
+                method: 'GET',
+                mode: 'no-cors'
+            })
+            .then(() => {
                 addBtn.disabled = false;
                 statusText.innerText = "Sent ✓";
                 statusText.style.color = "#27ae60"; 
-            }, 1500);
-            
-            setTimeout(() => { statusText.innerText = ""; }, 4500);
+                setTimeout(() => { statusText.innerText = ""; }, 3000);
+            })
+            .catch(err => {
+                addBtn.disabled = false;
+                statusText.innerText = "Failed ❌";
+                statusText.style.color = "#c0392b"; 
+                console.error("Email request failed:", err);
+            });
 
             renderTabs();
         }
