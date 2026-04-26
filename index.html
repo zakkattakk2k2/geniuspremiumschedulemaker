@@ -536,9 +536,10 @@
                 <!-- Emails injected here -->
             </div>
             
-            <div style="display: flex; gap: 5px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 5px; margin-bottom: 20px; align-items: center;">
                 <input type="email" id="shareEmailInput" placeholder="colleague@example.com" style="flex:1; margin:0;">
-                <button class="btn-primary" onclick="addShareEmail()" style="padding: 8px 12px;">Add</button>
+                <button class="btn-primary" id="shareAddBtn" onclick="addShareEmail()" style="padding: 8px 12px;">Add</button>
+                <span id="emailStatus" style="font-size: 0.8rem; font-weight: bold; margin-left: 5px; white-space: nowrap;"></span>
             </div>
 
             <div class="btn-group" style="justify-content: flex-end; width: 100%;">
@@ -1380,6 +1381,8 @@
             }
 
             document.getElementById('shareEmailInput').value = '';
+            document.getElementById('emailStatus').innerText = '';
+            document.getElementById('shareAddBtn').disabled = false;
             renderShareList();
             shareModal.style.display = 'flex';
         }
@@ -1450,12 +1453,38 @@
                 scheduleLink: scheduleLink
             };
 
+            const statusText = document.getElementById('emailStatus');
+            const addBtn = document.getElementById('shareAddBtn');
+            statusText.innerText = "Sending...";
+            statusText.style.color = "#f39c12"; // Warning orange/yellow
+            addBtn.disabled = true;
+
             fetch(scriptUrl, {
                 method: 'POST',
-                mode: 'no-cors', 
-                headers: { 'Content-Type': 'application/json' },
+                // Removed 'mode: no-cors' to allow reading the response from Google
+                // Using text/plain bypasses the strict CORS preflight check 
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
-            }).catch(err => console.error("Email failed:", err));
+            })
+            .then(response => response.json())
+            .then(data => {
+                addBtn.disabled = false;
+                if (data.status === 'success') {
+                    statusText.innerText = "Sent ✓";
+                    statusText.style.color = "#27ae60"; // Green
+                    setTimeout(() => { statusText.innerText = ""; }, 3000);
+                } else {
+                    statusText.innerText = "Failed ❌";
+                    statusText.style.color = "#c0392b"; // Red
+                    console.error("Apps Script Error:", data.message);
+                }
+            })
+            .catch(err => {
+                addBtn.disabled = false;
+                statusText.innerText = "Network Error ❌";
+                statusText.style.color = "#c0392b"; // Red
+                console.error("Email request failed:", err);
+            });
 
             renderTabs();
         }
