@@ -1443,15 +1443,15 @@
                 await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'schedules', 'main'), personalData);
             }
 
-            // --- Send Email via Google Apps Script ---
+            // --- Send Email via Google Apps Script (GET Method) ---
             const scriptUrl = "https://script.google.com/a/macros/geniuspremium.com/s/AKfycbxfbrdetOkaVdrihBdKppjUo7GH2SkYwlKDBoYxIAqX4YxTA5Ih82LukBJKyQZ8ZQoDhA/exec";
             const scheduleLink = window.location.origin + window.location.pathname + "?shared=" + activeId;
             
-            const payload = {
-                toEmail: email,
-                senderEmail: currentUser.email,
-                scheduleLink: scheduleLink
-            };
+            // Build the URL with the data attached directly to it
+            const urlWithData = new URL(scriptUrl);
+            urlWithData.searchParams.append("toEmail", email);
+            urlWithData.searchParams.append("senderEmail", currentUser.email);
+            urlWithData.searchParams.append("scheduleLink", scheduleLink);
 
             const statusText = document.getElementById('emailStatus');
             const addBtn = document.getElementById('shareAddBtn');
@@ -1459,17 +1459,12 @@
             statusText.style.color = "#f39c12"; // Warning orange/yellow
             addBtn.disabled = true;
 
-            fetch(scriptUrl, {
-                method: 'POST',
-                mode: 'no-cors', 
-                headers: { 
-                    // Crucial: Must be text/plain so the browser skips the OPTIONS preflight request that Google blocks
-                    'Content-Type': 'text/plain;charset=utf-8' 
-                },
-                body: JSON.stringify(payload)
+            // Send a simple GET request (Bypasses Google Workspace POST blocks)
+            fetch(urlWithData.toString(), {
+                method: 'GET',
+                mode: 'no-cors'
             })
             .then(() => {
-                // With no-cors, we assume success if the browser successfully dispatched the request
                 addBtn.disabled = false;
                 statusText.innerText = "Sent ✓";
                 statusText.style.color = "#27ae60"; // Green
