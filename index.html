@@ -1444,7 +1444,7 @@
             }
 
             // --- Send Email via Google Apps Script (GET Method) ---
-            const scriptUrl = "https://script.google.com/a/macros/geniuspremium.com/s/AKfycbxfbrdetOkaVdrihBdKppjUo7GH2SkYwlKDBoYxIAqX4YxTA5Ih82LukBJKyQZ8ZQoDhA/exec";
+            const scriptUrl = "https://script.google.com/macros/s/AKfycbxl43NkR69YuoQGh-vSF5j6-MBVb2wF1CTx9_yaL62KI1DJPA8kTbi1vuXGXuzBUmgsWw/exec";
             const scheduleLink = window.location.origin + window.location.pathname + "?shared=" + activeId;
             
             // Build the URL with the data attached directly to it
@@ -1455,27 +1455,21 @@
 
             const statusText = document.getElementById('emailStatus');
             const addBtn = document.getElementById('shareAddBtn');
-            statusText.innerText = "Sending...";
+            statusText.innerText = "Opening secure tab...";
             statusText.style.color = "#f39c12"; // Warning orange/yellow
             addBtn.disabled = true;
 
-            // Send a simple GET request (Bypasses Google Workspace POST blocks)
-            fetch(urlWithData.toString(), {
-                method: 'GET',
-                mode: 'no-cors'
-            })
-            .then(() => {
+            // Open a new tab to force the Google Workspace login firewall
+            window.open(urlWithData.toString(), '_blank');
+            
+            // Reset the UI button and show success
+            setTimeout(() => { 
                 addBtn.disabled = false;
                 statusText.innerText = "Sent ✓";
-                statusText.style.color = "#27ae60"; // Green
-                setTimeout(() => { statusText.innerText = ""; }, 3000);
-            })
-            .catch(err => {
-                addBtn.disabled = false;
-                statusText.innerText = "Failed ❌";
-                statusText.style.color = "#c0392b"; // Red
-                console.error("Email request failed:", err);
-            });
+                statusText.style.color = "#27ae60"; 
+            }, 1500);
+            
+            setTimeout(() => { statusText.innerText = ""; }, 4500);
 
             renderTabs();
         }
