@@ -1,0 +1,3420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta id="app-viewport" name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Genius Premium Tuition - Schedule Generator</title>
+
+    <!-- ================================================================
+         ╔════════════════════════════════════════════════════════════╗
+         ║   ZAK'S ACCESS CONTROL PANEL — edit ONLY this block         ║
+         ╚════════════════════════════════════════════════════════════╝
+         Two SEPARATE access grants. A user can have one, both, or none.
+
+         1) PINK_UI_USERS  — emails listed here get the 🎀 "Turn UI Pink"
+            (Girly Pop) button after they log in.
+
+         2) MOTIVATION_USERS — emails listed here get the ✨ "Daily
+            Motivation" button after they log in. The button opens
+            MOTIVATION_URL in a new tab — change that link any time
+            you want to send a new motivational page.
+    ================================================================= -->
+        <script>
+        window.ACCESS = {
+            PINK_UI_USERS: [
+                'natasha.d@geniuspremium.com','zak.k@geniuspremium.com',
+            ],
+            MOTIVATION_USERS: [
+                'natasha.d@geniuspremium.com','zak.k@geniuspremium.com','saxon.f@geniuspremium.com','himara.n@geniuspremium.com','jacqueline.j@geniuspremium.com','christalla.n@geniuspremium.com','jacky.j@geniuspremium.com','shayleigh.m@geniuspremium.com'
+            ],
+            // The link the ✨ Daily Motivation button opens:
+            MOTIVATION_URL: 'https://matias.ma/nsfw/',
+        };
+    </script>
+    <!-- ============== END OF ACCESS CONTROL PANEL ================== -->
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Theme display fonts (applied only inside theme-* download classes) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Baloo+2:wght@600;700;800&family=Orbitron:wght@600;700;800&family=Luckiest+Guy&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #1a2a3a;
+            --text-dark: #333333;
+            --bg-light: #f9fbfd;
+            --grid-border: #e0e6ed;
+            --accent-gold: #d4af37;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #14181f 0%, #050608 100%) fixed;
+            min-height: 100vh;
+            color: #f5f6f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ============================================== */
+        /* ===== MOTION TOKENS                      ===== */
+        /* ============================================== */
+        /* One source of truth for easing + duration. The browser's built-in
+           easings are too weak to read as intentional, so everything uses a
+           custom curve. Never ease-in on UI: it delays the first frame, which
+           is the exact moment the user is watching. */
+        :root {
+            --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);   /* enter / exit  */
+            --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);  /* on-screen move */
+            --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);   /* iOS-like sheet */
+
+            --d-press:  140ms;  /* button press feedback   */
+            --d-quick:  180ms;  /* small state changes     */
+            --d-enter:  220ms;  /* modal / panel entrance  */
+            --d-exit:   150ms;  /* exits always snap back  */
+        }
+
+        /* Reduced motion = fewer and gentler, not zero. Opacity and colour
+           stay (they aid comprehension); everything that MOVES is dropped. */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            .modal-overlay, .modal-overlay .modal, #toast {
+                transition-duration: 120ms !important;   /* keep the fade */
+                transition-property: opacity !important; /* drop the travel */
+            }
+        }
+
+        /* ============================================== */
+        /* ===== INTRO / WELCOME OVERLAY (LANDING)  ===== */
+        /* ============================================== */
+        #welcome-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, #14181f 0%, #050608 100%);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
+            overflow: hidden;
+        }
+
+        /* Subtle gold shimmer line */
+        #welcome-overlay::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: -10%;
+            width: 120%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.35), transparent);
+            transform: translateY(-50%);
+            opacity: 0;
+            animation: shimmer 2.6s ease-in-out 0.2s 1 forwards;
+        }
+
+        @keyframes shimmer {
+            0%   { opacity: 0; transform: translateY(-50%) scaleX(0.4); }
+            40%  { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-50%) scaleX(1.2); }
+        }
+
+        #welcome-overlay.is-hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .welcome-stage {
+            position: absolute;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.55s ease, transform 0.55s ease;
+            color: #fff;
+        }
+        .welcome-stage.is-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .welcome-stage.is-leaving {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        #welcome-greeting {
+            font-size: 2.6rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            color: #f4f6fa;
+        }
+        #welcome-greeting .accent {
+            color: var(--accent-gold);
+            font-weight: 500;
+        }
+
+        #welcome-logo .brand-big {
+            font-size: 5.5rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -2.5px;
+            line-height: 1;
+        }
+        #welcome-logo .brand-big .dot {
+            color: var(--accent-gold);
+        }
+        #welcome-logo .brand-sub {
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: 6px;
+            color: #b8bcc4;
+            margin-top: 12px;
+        }
+        #welcome-logo .brand-tagline {
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: 6px;
+            color: #b8bcc4;
+            font-style: italic;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+
+        .welcome-credits {
+            position: absolute;
+            bottom: 26px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: #8a909b;
+            line-height: 1.7;
+        }
+
+        /* Permanent app footer (hidden from PNG export) */
+        .app-credits {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            font-size: 0.78rem;
+            color: #8a909b;
+            padding: 18px;
+            letter-spacing: 1.5px;
+        }
+
+        /* Lock body scroll while overlay is up */
+        body.intro-running {
+            overflow: hidden;
+        }
+        /* ============================================== */
+
+        /* --- Tabs Section --- */
+        .tab-container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            gap: 8px;
+            margin-bottom: 0;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .tab {
+            padding: 10px 18px;
+            background: #dce3eb;
+            color: #555;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color var(--d-quick) ease,
+                        color var(--d-quick) ease;
+            border: 1px solid #c8d3df;
+            border-bottom: none;
+            white-space: nowrap;
+        }
+
+        .tab:hover { background: #e9eff5; }
+
+        .tab.active {
+            background: white;
+            color: var(--primary-navy);
+            /* Was `border-top: 3px solid gold`, which shoved the tab down 3px
+               every switch. An inset shadow paints the same bar with no
+               layout shift, so the gold rail below can slide cleanly. */
+            border-top: 1px solid transparent;
+            box-shadow: inset 0 3px 0 var(--accent-gold), 0 -2px 10px rgba(0,0,0,0.02);
+            border-left: 1px solid transparent;
+            border-right: 1px solid transparent;
+        }
+
+        /* The travelling gold rail. One element for the whole tab strip; it
+           slides between tabs instead of the marker cutting to a new spot. */
+        .tab-container { position: relative; }
+        .tab-rail {
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            height: 2.5px;
+            width: 0;
+            border-radius: 2px;
+            background: var(--accent-gold);
+            pointer-events: none;
+            transition: transform var(--d-enter) var(--ease-in-out),
+                        width var(--d-enter) var(--ease-in-out),
+                        opacity var(--d-quick) ease;
+        }
+        .tab-rail.is-instant { transition: none; }
+
+        .tab-delete {
+            color: #999;
+            font-size: 1.1rem;
+            line-height: 1;
+            padding: 0 4px;
+            border-radius: 50%;
+        }
+
+        .tab-delete:hover {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .add-tab-btn {
+            padding: 8px 15px;
+            background: transparent;
+            border: 1.5px dashed var(--primary-navy);
+            color: var(--primary-navy);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .add-tab-btn:hover { background: rgba(26, 42, 58, 0.05); }
+
+        /* --- Controls Section --- */
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 0 8px 8px 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary-navy);
+            text-transform: uppercase;
+        }
+
+        .input-group input, .input-group select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .input-group input[type="text"] { min-width: 180px; }
+
+        /* Custom Toggle Switch Styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary-navy); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            /* Named properties, not `all` — `all` animates things we never
+               meant to animate, off the GPU. */
+            transition: background-color var(--d-quick) ease,
+                        color var(--d-quick) ease,
+                        border-color var(--d-quick) ease,
+                        transform var(--d-press) var(--ease-out);
+        }
+
+        /* Every pressable thing confirms the press. Without this a tap that
+           starts slow work (like Export) reads as a dead button. */
+        button:active { transform: scale(0.97); }
+
+        .btn-primary { background-color: var(--primary-navy); color: white; }
+        .btn-primary:hover { background-color: #111d28; }
+        .btn-danger { background-color: #e74c3c; color: white; }
+        .btn-danger:hover { background-color: #c0392b; }
+
+        /* Secondary buttons (Archive / Sent) - match existing height/radius */
+        .btn-secondary {
+            background-color: #eef2f7;
+            color: var(--primary-navy);
+            border: 1px solid #d2dce6;
+        }
+        .btn-secondary:hover { background-color: #e1e8f0; }
+        .btn-secondary-long {
+            max-width: 230px;
+            text-align: center;
+            line-height: 1.25;
+            white-space: normal;
+        }
+
+        /* Utility row: archive opener + history icon button */
+        .utility-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            color: #5a6675;
+            font-size: 0.78rem;
+            padding: 8px 12px;
+        }
+        .btn-ghost:hover { background: #f1f4f8; color: var(--primary-navy); }
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            color: #5a6675;
+            font-size: 0.78rem;
+            padding: 8px 12px;
+        }
+        .btn-icon:hover { background: #f1f4f8; color: var(--primary-navy); }
+        .btn-icon svg { display: block; }
+
+        /* ===== EXPORT: busy state + save sheet ===== */
+        /* Capture takes 1-3s on a phone. Without this the button looked dead
+           for the whole run, which is why the broken download read as an
+           unresponsive button rather than a failed save. */
+        #exportBtn { position: relative; }
+        #exportBtn[data-busy="true"] {
+            pointer-events: none;
+            color: transparent;
+        }
+        #exportBtn[data-busy="true"]::after {
+            content: "";
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 15px; height: 15px;
+            margin: -7.5px 0 0 -7.5px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: exportSpin 560ms linear infinite;
+        }
+        @keyframes exportSpin { to { transform: rotate(360deg); } }
+
+        /* iOS can't be handed a file silently, so the PNG is presented and the
+           user saves it with a real tap. Doubles as a preview everywhere else. */
+        #saveSheet .modal {
+            width: min(420px, 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        #saveSheet img {
+            width: 100%;
+            max-height: 46vh;
+            object-fit: contain;
+            border-radius: 6px;
+            border: 1px solid #d8e0ea;
+            background: #fff;
+        }
+        #saveSheet .save-hint {
+            font-size: 0.78rem;
+            color: #5c6a7a;
+            line-height: 1.45;
+            margin: 0;
+        }
+        #saveSheet .save-actions { display: flex; gap: 10px; }
+        #saveSheet .save-actions button { flex: 1; }
+
+        /* Toast + Undo */
+        #toast {
+            position: fixed;
+            left: 50%;
+            bottom: 28px;
+            /* Percentage, not 20px — it travels by its own height, so a
+               two-line toast enters from just as far off as a one-line one. */
+            transform: translateX(-50%) translateY(140%);
+            background: var(--primary-navy);
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            opacity: 0;
+            visibility: hidden;
+            overflow: hidden;
+            /* Exit snaps (180ms); entry is unhurried (260ms). Symmetric
+               timing is what made this feel sluggish. `visibility` is no
+               longer in the list — it can't interpolate, it just delayed
+               the element becoming inert. */
+            transition: opacity var(--d-quick) ease,
+                        transform var(--d-quick) var(--ease-out),
+                        visibility 0s linear var(--d-quick);
+            z-index: 3000;
+            max-width: 90vw;
+        }
+        #toast.is-visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+            transition: opacity 260ms ease,
+                        transform 260ms var(--ease-out),
+                        visibility 0s linear 0s;
+        }
+
+        /* Gold rail that drains over the undo window, so "how long have I got"
+           is something you can see rather than guess. */
+        #toastRail {
+            position: absolute;
+            left: 0; bottom: 0;
+            height: 2px;
+            width: 100%;
+            background: var(--accent-gold);
+            transform: scaleX(0);
+            transform-origin: left center;
+            opacity: 0;
+        }
+        #toastRail.is-running {
+            opacity: 1;
+            transform: scaleX(0);
+            transition: transform var(--toast-life, 5000ms) linear;
+        }
+        #toastRail.is-armed {
+            opacity: 1;
+            transform: scaleX(1);
+            transition: none;
+        }
+        #toastUndo {
+            background: var(--accent-gold);
+            color: var(--primary-navy);
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 5px;
+        }
+        #toastUndo.is-hidden { display: none; }
+
+        /* Archive / version list items */
+        .archive-item, .version-item {
+            display: flex; justify-content: space-between; align-items: center; gap: 8px;
+            padding: 8px 10px; background: #f1f4f8; border-radius: 4px; margin-bottom: 5px; font-size: 0.85rem;
+        }
+        .archive-item .item-actions, .version-item .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .archive-item button, .version-item button {
+            padding: 4px 9px; font-size: 0.72rem; border-radius: 4px; font-weight: 600;
+        }
+        .item-reopen, .item-restore { background: var(--primary-navy); color: #fff; }
+        .item-reopen:hover, .item-restore:hover { background: #111d28; }
+        .item-delete { background: #e74c3c; color: #fff; }
+        .item-delete:hover { background: #c0392b; }
+        .version-item .ver-meta { display: flex; flex-direction: column; gap: 1px; overflow: hidden; }
+        .version-item .ver-meta .ver-label { font-weight: 700; color: var(--primary-navy); }
+        .version-item .ver-meta .ver-time { font-size: 0.72rem; color: #888; }
+        .archive-empty { color: #999; font-style: italic; font-size: 0.82rem; padding: 4px; }
+
+        /* --- Schedule Canvas --- */
+        .schedule-wrapper {
+            background: white;
+            width: 100%;
+            max-width: 900px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 30px;
+            position: relative;
+        }
+
+        .overlay-empty {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9); z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-size: 1.2rem; color: #555; font-weight: 600; text-align: center;
+            display: none;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--primary-navy);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .brand-logo {
+            font-weight: 800;
+            font-size: 3.5rem;
+            color: var(--primary-navy);
+            letter-spacing: -1.5px;
+            line-height: 0.85;
+            margin-top: 5px;
+        }
+        .brand-logo .dot { color: var(--accent-gold); }
+        .brand-logo .subtext {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        .schedule-info { text-align: right; }
+        .schedule-info h1 { margin: 0 0 5px 0; font-size: 1.4rem; color: var(--primary-navy); }
+        .schedule-info p { margin: 0; font-size: 0.9rem; font-weight: 600; color: #666; }
+
+        .auth-container { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; justify-content: flex-end; }
+
+        /* --- The Grid --- */
+        .grid {
+            display: grid;
+            border-top: 1px solid var(--grid-border);
+            border-left: 1px solid var(--grid-border);
+            position: relative;
+        }
+
+        .grid-header, .grid-cell, .grid-time {
+            border-right: 1px solid var(--grid-border);
+            border-bottom: 1px solid var(--grid-border);
+            padding: 5px;
+            text-align: center;
+        }
+
+        .grid-header { background-color: var(--bg-light); font-weight: 700; font-size: 0.85rem; color: var(--primary-navy); padding: 10px 5px; }
+        .grid-time { font-size: 0.75rem; color: #777; font-weight: 600; background-color: var(--bg-light); display: flex; align-items: center; justify-content: center; }
+        /* No transition here on purpose. You sweep across these cells hundreds
+           of times a session; a 200ms fade on every one reads as lag, not
+           polish. Hover is gated so a tap on a phone doesn't leave a cell
+           stuck in its hover colour. */
+        .grid-cell { cursor: pointer; min-height: 35px; }
+        @media (hover: hover) and (pointer: fine) {
+            .grid-cell:hover { background-color: #f1f4f8; }
+        }
+
+        /* --- Events --- */
+        .event {
+            margin: 2px; border-radius: 4px; padding: 6px; font-size: 0.75rem; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: flex-start; line-height: 1.3;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: white; z-index: 10; position: relative;
+            cursor: grab; transition: opacity 0.2s;
+        }
+        .event:active { cursor: grabbing; }
+
+        /* Only the block you just placed animates. Re-animating the whole
+           week on every render is decoration; animating the one thing that
+           changed is information. */
+        .event.is-fresh {
+            animation: eventIn var(--d-quick) var(--ease-out) both;
+        }
+        @keyframes eventIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        .event * { pointer-events: none; }
+        .event strong { display: block; font-size: 0.85rem; margin-bottom: 2px; }
+        .event-time { margin-top: auto; font-size: 0.7rem; font-weight: 600; color: rgba(255, 255, 255, 0.85); padding-top: 4px; }
+
+        .event.event-15min { flex-direction: row; align-items: center; padding: 2px 6px; white-space: nowrap; }
+        .event.event-15min .event-content-wrapper { display: flex; align-items: center; gap: 5px; width: 100%; overflow: hidden; }
+        .event.event-15min strong { margin-bottom: 0; font-size: 0.75rem; }
+        .event.event-15min span { font-size: 0.7rem; color: rgba(255, 255, 255, 0.85); }
+
+        .event-delete {
+            position: absolute; top: 2px; right: 4px; cursor: pointer; font-weight: bold;
+            display: none; background: rgba(0, 0, 0, 0.25); color: white; border-radius: 50%;
+            padding: 0 4px; pointer-events: auto !important;
+        }
+        .event:hover .event-delete { display: block; }
+        .event-15min:hover .event-delete { top: 0px; right: 2px; }
+
+        .c-blue   { background-color: #2196F3; border-left: 3px solid #0D47A1; }
+        .c-green  { background-color: #4CAF50; border-left: 3px solid #1B5E20; }
+        .c-red    { background-color: #F44336; border-left: 3px solid #B71C1C; }
+        .c-purple { background-color: #9C27B0; border-left: 3px solid #4A148C; }
+        .c-teal   { background-color: #009688; border-left: 3px solid #004D40; }
+        .c-mint   { background-color: #00BFA5; border-left: 3px solid #004D40; }
+        .c-rose   { background-color: #E91E63; border-left: 3px solid #880E4F; }
+        .c-gray   { background-color: #78909C; border-left: 3px solid #263238; }
+        .c-orange { background-color: #FF9800; border-left: 3px solid #E65100; }
+        .c-indigo { background-color: #3F51B5; border-left: 3px solid #1A237E; }
+        .c-yellow { background-color: #FFEB3B; border-left: 3px solid #F57F17; color: #333; }
+        .c-yellow .event-time, .c-yellow span { color: #555; }
+        .c-yellow .event-delete { background: rgba(0,0,0,0.1); color: #333; }
+
+        /* --- Modals --- */
+        /* Modals used to snap straight from display:none to display:flex —
+           the harshest transition in the app. openOverlay()/closeOverlay()
+           now toggle .is-open around the display change so this can run. */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000;
+            opacity: 0;
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+            transition: opacity var(--d-exit) ease,
+                        backdrop-filter var(--d-exit) ease,
+                        -webkit-backdrop-filter var(--d-exit) ease;
+        }
+        .modal-overlay.is-open {
+            opacity: 1;
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
+            transition: opacity var(--d-enter) ease,
+                        backdrop-filter var(--d-enter) ease,
+                        -webkit-backdrop-filter var(--d-enter) ease;
+        }
+
+        .modal { background: white; padding: 25px; border-radius: 8px; width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+
+        /* Starts at .955, never scale(0) — nothing in the real world appears
+           from nothing. Modals scale from centre (they aren't anchored to a
+           trigger the way a popover is). Exit is faster than entry. */
+        .modal-overlay .modal {
+            transform: scale(0.955);
+            transition: transform var(--d-exit) var(--ease-out);
+        }
+        .modal-overlay.is-open .modal {
+            transform: scale(1);
+            transition: transform var(--d-enter) var(--ease-out);
+        }
+
+        /* On a phone a centred dialog fights the keyboard, so it becomes a
+           bottom sheet that rises by its own height. */
+        @media (max-width: 768px) {
+            .modal-overlay { align-items: flex-end; }
+            .modal-overlay .modal {
+                width: 100%;
+                border-radius: 12px 12px 0 0;
+                transform: translateY(100%);
+                transition: transform var(--d-exit) var(--ease-out);
+            }
+            .modal-overlay.is-open .modal {
+                transform: translateY(0);
+                transition: transform 320ms var(--ease-drawer);
+            }
+        }
+        .modal h3 { margin-top: 0; color: var(--primary-navy); margin-bottom: 15px;}
+        .modal label { font-size: 0.85rem; font-weight: 600; color: var(--primary-navy); display: block; margin-bottom: 4px;}
+        .modal select, .modal input[type="text"], .modal input[type="email"] {
+            width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px;
+        }
+
+        .time-selectors { display: flex; gap: 10px; margin-bottom: 15px; }
+        .time-selectors select { width: 50%; margin-bottom: 0;}
+
+        .day-checkboxes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .day-checkboxes label {
+            background: #f1f4f8; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;
+            border: 1px solid #ccc; font-weight: 400; display: flex; align-items: center; gap: 4px;
+        }
+        .day-checkboxes input:checked + label { background: var(--primary-navy); color: white; border-color: var(--primary-navy); }
+
+        .color-picker-wrapper { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .color-swatch {
+            width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent;
+            transition: transform var(--d-quick) var(--ease-out), box-shadow var(--d-quick) ease;
+        }
+        /* Gated: on a touch screen a tap fires :hover and leaves the swatch
+           stuck at 1.15 until you tap something else. */
+        @media (hover: hover) and (pointer: fine) {
+            .color-swatch:hover { transform: scale(1.15); }
+        }
+        .color-swatch:active { transform: scale(1.05); }
+        .color-swatch.active { border-color: var(--primary-navy); transform: scale(1.15); box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+
+        /* --- Grid scroll wrapper (desktop = no horizontal scroll) --- */
+        .grid-scroll { width: 100%; }
+
+        /* ============================================== */
+        /* ===== RESPONSIVE / MOBILE                ===== */
+        /* ============================================== */
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+
+            .tab-container, .controls, .schedule-wrapper, .app-credits { max-width: 100%; }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 16px;
+                gap: 12px;
+            }
+            .input-group { width: 100%; }
+            .input-group input, .input-group select { width: 100%; }
+            .input-group input[type="text"] { min-width: 0; }
+
+            .utility-row {
+                margin-left: 0;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+
+            .btn-group {
+                margin-left: 0;
+                flex-wrap: wrap;
+                width: 100%;
+            }
+            .btn-group > button {
+                flex: 1 1 auto;
+                min-width: 120px;
+            }
+            .btn-secondary-long {
+                max-width: 100%;
+                flex-basis: 100%;
+            }
+
+            .schedule-wrapper { padding: 18px; }
+
+            .brand-logo { font-size: 2.6rem; }
+            .brand-logo .subtext { font-size: 0.95rem; }
+            .schedule-info h1 { font-size: 1.15rem; }
+
+            header { flex-direction: column; gap: 12px; }
+            .schedule-info { text-align: left; }
+            .auth-container { justify-content: flex-start; }
+
+            /* Mobile grid: horizontal scroll, pinned time column */
+            .grid-scroll {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            #scheduleGrid {
+                min-width: 720px;
+            }
+            .grid-scroll .time-label {
+                position: sticky;
+                left: 0;
+                z-index: 5;
+                background-color: var(--bg-light);
+            }
+            .grid-scroll .corner-cell { z-index: 6; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 8px; }
+            .schedule-wrapper { padding: 12px; }
+            .brand-logo { font-size: 2.1rem; }
+            .brand-logo .subtext { font-size: 0.8rem; letter-spacing: 1px; }
+            .schedule-info h1 { font-size: 1rem; }
+            button { font-size: 0.82rem; padding: 9px 14px; }
+
+            .modal {
+                width: auto;
+                max-width: 100%;
+                margin: 0 12px;
+            }
+            #welcome-logo .brand-big { font-size: 3.6rem; }
+        }
+
+        /* Subtle premium polish (all sizes) */
+        .controls, .schedule-wrapper, .modal { transition: box-shadow 0.25s ease; }
+        .tab, button, .input-group input, .input-group select {
+            transition: background-color var(--d-quick) ease,
+                        color var(--d-quick) ease,
+                        border-color var(--d-quick) ease;
+        }
+        /* Buttons keep their press transform on top of the above. */
+        button { transition: background-color var(--d-quick) ease,
+                             color var(--d-quick) ease,
+                             border-color var(--d-quick) ease,
+                             transform var(--d-press) var(--ease-out); }
+
+        /* ============================================== */
+        /* ===== DOWNLOAD THEMES (scoped, export only) == */
+        /* ============================================== */
+
+        /* ---------- Storybook Stripes ---------- */
+        #capture-area.theme-storybook {
+            background: #ffffff;
+            border: 6px solid #e3000f;
+            border-radius: 18px;
+        }
+        #capture-area.theme-storybook header {
+            border-bottom: 4px solid #e3000f;
+            background: repeating-linear-gradient(
+                45deg, #e3000f 0, #e3000f 22px, #ffffff 22px, #ffffff 44px
+            );
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 24px;
+        }
+        #capture-area.theme-storybook .brand-logo,
+        #capture-area.theme-storybook .schedule-info h1 {
+            font-family: 'Fredoka', 'Baloo 2', cursive;
+            color: #ffffff;
+            text-shadow: 2px 2px 0 #1fb6c1;
+        }
+        #capture-area.theme-storybook .brand-logo .subtext { color: #fff; }
+        #capture-area.theme-storybook .brand-logo .dot { color: #1fb6c1; }
+        #capture-area.theme-storybook .schedule-info p { color: #fff; font-weight: 700; }
+        #capture-area.theme-storybook .grid {
+            border-color: #e3000f;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        #capture-area.theme-storybook .grid-header {
+            font-family: 'Fredoka', 'Baloo 2', cursive;
+            background: #1fb6c1;
+            color: #fff;
+            border-color: #e3000f;
+        }
+        #capture-area.theme-storybook .grid-time {
+            font-family: 'Fredoka', 'Baloo 2', cursive;
+            color: #e3000f;
+            background: #fff7f7;
+            border-color: #f3b6ba;
+            font-weight: 700;
+        }
+        #capture-area.theme-storybook .grid-cell { border-color: #f3b6ba; }
+        #capture-area.theme-storybook .event {
+            font-family: 'Fredoka', 'Baloo 2', cursive;
+            border-radius: 12px;
+            border-left-width: 5px;
+            box-shadow: 0 3px 0 rgba(227,0,15,0.25);
+        }
+
+        /* ---------- Space Explorer ---------- */
+        #capture-area.theme-space {
+            background-color: #0b1026;
+            background-image:
+                radial-gradient(1.5px 1.5px at 20% 30%, #ffffff, transparent),
+                radial-gradient(1.5px 1.5px at 70% 65%, #cfe8ff, transparent),
+                radial-gradient(1px 1px at 40% 80%, #ffffff, transparent),
+                radial-gradient(1px 1px at 85% 20%, #9b6bff, transparent),
+                radial-gradient(2px 2px at 55% 15%, #3ef0ff, transparent),
+                radial-gradient(1px 1px at 10% 70%, #ffffff, transparent);
+            border: 2px solid #3ef0ff;
+            border-radius: 14px;
+        }
+        #capture-area.theme-space header { border-bottom: 2px solid #3ef0ff; }
+        #capture-area.theme-space .brand-logo,
+        #capture-area.theme-space .schedule-info h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: #3ef0ff;
+            text-shadow: 0 0 10px rgba(62,240,255,0.6);
+        }
+        #capture-area.theme-space .brand-logo .subtext { color: #9b6bff; }
+        #capture-area.theme-space .brand-logo .dot { color: #9b6bff; }
+        #capture-area.theme-space .schedule-info p { color: #b9c4e8; }
+        #capture-area.theme-space .grid {
+            border-color: rgba(62,240,255,0.35);
+        }
+        #capture-area.theme-space .grid-header {
+            font-family: 'Orbitron', sans-serif;
+            background: rgba(155,107,255,0.18);
+            color: #e8ecff;
+            border-color: rgba(62,240,255,0.35);
+        }
+        #capture-area.theme-space .grid-time {
+            font-family: 'Orbitron', sans-serif;
+            color: #3ef0ff;
+            background: rgba(11,16,38,0.7);
+            border-color: rgba(62,240,255,0.25);
+        }
+        #capture-area.theme-space .grid-cell {
+            background: rgba(20,28,60,0.35);
+            border-color: rgba(62,240,255,0.18);
+        }
+        #capture-area.theme-space .event {
+            border-radius: 8px;
+            box-shadow: 0 0 12px rgba(62,240,255,0.35);
+            color: #ffffff;
+        }
+
+        /* ---------- Jungle Safari ---------- */
+        #capture-area.theme-jungle {
+            background-color: #f3f8ef;
+            background-image:
+                radial-gradient(circle at 12% 18%, rgba(102,187,106,0.18) 0 14px, transparent 15px),
+                radial-gradient(circle at 88% 78%, rgba(46,125,50,0.16) 0 18px, transparent 19px),
+                radial-gradient(circle at 75% 10%, rgba(102,187,106,0.14) 0 10px, transparent 11px);
+            border: 5px solid #2e7d32;
+            border-radius: 22px;
+        }
+        #capture-area.theme-jungle header { border-bottom: 4px solid #5d4037; }
+        #capture-area.theme-jungle .brand-logo,
+        #capture-area.theme-jungle .schedule-info h1 {
+            font-family: 'Luckiest Guy', 'Baloo 2', cursive;
+            color: #2e7d32;
+            letter-spacing: 0.5px;
+        }
+        #capture-area.theme-jungle .brand-logo .subtext { color: #5d4037; }
+        #capture-area.theme-jungle .brand-logo .dot { color: #66bb6a; }
+        #capture-area.theme-jungle .schedule-info p { color: #5d4037; font-weight: 700; }
+        #capture-area.theme-jungle .grid { border-color: #66bb6a; border-radius: 14px; overflow: hidden; }
+        #capture-area.theme-jungle .grid-header {
+            font-family: 'Luckiest Guy', 'Baloo 2', cursive;
+            background: #2e7d32;
+            color: #fff;
+            border-color: #1b5e20;
+            letter-spacing: 0.5px;
+        }
+        #capture-area.theme-jungle .grid-time {
+            font-family: 'Baloo 2', cursive;
+            color: #5d4037;
+            background: #eaf3e3;
+            border-color: #a5d6a7;
+            font-weight: 700;
+        }
+        #capture-area.theme-jungle .grid-cell { border-color: #c8e6c9; }
+        #capture-area.theme-jungle .event {
+            font-family: 'Baloo 2', cursive;
+            border-radius: 16px;
+            border-left-width: 5px;
+            box-shadow: 0 3px 6px rgba(93,64,55,0.25);
+        }
+
+        /* ============================================== */
+        /* ===== SLEEK DARK APP SHELL (screen only) ===== */
+        /* ===== Not captured by html2canvas        ===== */
+        /* ============================================== */
+
+        /* --- Tabs / controls panels --- */
+        .tab-container {
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .tab {
+            background: #1b2029;
+            color: #b8bcc4;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-bottom: none;
+        }
+        .tab:hover { background: #232a35; color: #f5f6f8; }
+        .tab.active {
+            background: #14181f;
+            color: #f5f6f8;
+            border-top: 1px solid transparent;
+            border-left: 1px solid rgba(255,255,255,0.08);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            box-shadow: inset 0 3px 0 var(--accent-gold);
+        }
+        .tab-delete { color: #8a909b; }
+        .tab-delete:hover { color: #ff6b5e; background: rgba(255,107,94,0.12); }
+
+        .add-tab-btn {
+            background: transparent;
+            border: 1.5px dashed rgba(212,175,55,0.55);
+            color: var(--accent-gold);
+        }
+        .add-tab-btn:hover { background: rgba(212,175,55,0.10); }
+
+        .controls {
+            background: #14181f;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+
+        .input-group label { color: #b8bcc4; }
+        .input-group input, .input-group select {
+            background: #1b2029;
+            color: #f5f6f8;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .input-group input::placeholder { color: #6e7480; }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 2px rgba(212,175,55,0.25);
+        }
+        .input-group select option { background: #1b2029; color: #f5f6f8; }
+
+        /* Toggle switch (dark) */
+        .slider { background-color: #3a414d; }
+        input:checked + .slider { background-color: var(--accent-gold); }
+
+        /* --- Buttons (dark) --- */
+        .btn-primary { background-color: var(--accent-gold); color: #14181f; }
+        .btn-primary:hover { background-color: #e6c14d; }
+        .btn-danger { background-color: #c0392b; color: #fff; }
+        .btn-danger:hover { background-color: #a93226; }
+        .btn-secondary {
+            background-color: transparent;
+            color: #f5f6f8;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .btn-secondary:hover { background-color: rgba(255,255,255,0.06); }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #b8bcc4;
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.06); color: #f5f6f8; }
+        .btn-icon {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #b8bcc4;
+        }
+        .btn-icon:hover { background: rgba(255,255,255,0.06); color: #f5f6f8; }
+
+        /* --- Toast (dark) --- */
+        #toast {
+            background: #1b2029;
+            color: #f5f6f8;
+            border: 1px solid rgba(255,255,255,0.10);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        #toastUndo { background: var(--accent-gold); color: #14181f; }
+
+        /* --- Archive / version list items (dark) --- */
+        .archive-item, .version-item {
+            background: #1b2029;
+            color: #f5f6f8;
+        }
+        .item-reopen, .item-restore { background: var(--accent-gold); color: #14181f; }
+        .item-reopen:hover, .item-restore:hover { background: #e6c14d; }
+        .item-delete { background: #c0392b; color: #fff; }
+        .item-delete:hover { background: #a93226; }
+        .version-item .ver-meta .ver-label { color: #f5f6f8; }
+        .version-item .ver-meta .ver-time { color: #8a909b; }
+        .archive-empty { color: #8a909b; }
+
+        /* --- Modals (dark) --- */
+        .modal {
+            background: #14181f;
+            color: #f5f6f8;
+            border: 1px solid rgba(255,255,255,0.10);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+        .modal h3 { color: #f5f6f8; }
+        .modal label { color: #b8bcc4; }
+        .modal p { color: #b8bcc4; }
+        .modal select, .modal input[type="text"], .modal input[type="email"] {
+            background: #1b2029;
+            color: #f5f6f8;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .modal input::placeholder { color: #6e7480; }
+        .modal select:focus, .modal input[type="text"]:focus, .modal input[type="email"]:focus {
+            outline: none; border-color: var(--accent-gold);
+            box-shadow: 0 0 0 2px rgba(212,175,55,0.25);
+        }
+        .day-checkboxes label {
+            background: #1b2029; color: #b8bcc4;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .day-checkboxes input:checked + label {
+            background: var(--accent-gold); color: #14181f; border-color: var(--accent-gold);
+        }
+        .color-swatch.active { border-color: var(--accent-gold); box-shadow: 0 0 0 2px rgba(212,175,55,0.4); }
+        .modal .btn-group button[style*="background:#ccc"] {
+            background: #2a313c !important; color: #f5f6f8 !important;
+        }
+        .modal .btn-group button[style*="background:#ccc"]:hover {
+            background: #353d49 !important;
+        }
+
+        /* footer credits already muted #8a909b — fine on dark */
+
+        /* ============================================== */
+        /* ===== DARK SCHEDULE CARD (screen only)   ===== */
+        /* ===== additive: removed before export    ===== */
+        /* ============================================== */
+        #capture-area.dark-card {
+            background: #14181f;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #capture-area.dark-card header {
+            border-bottom: 2px solid rgba(212,175,55,0.45);
+        }
+        #capture-area.dark-card .brand-logo { color: #f5f6f8; }
+        #capture-area.dark-card .brand-logo .dot { color: var(--accent-gold); }
+        #capture-area.dark-card .brand-logo .subtext { color: #b8bcc4; }
+        #capture-area.dark-card .schedule-info h1 { color: #f5f6f8; }
+        #capture-area.dark-card .schedule-info p { color: #b8bcc4; }
+        #capture-area.dark-card #userStatus { color: #b8bcc4 !important; }
+        #capture-area.dark-card .grid {
+            border-top: 1px solid rgba(255,255,255,0.12);
+            border-left: 1px solid rgba(255,255,255,0.12);
+        }
+        #capture-area.dark-card .grid-header,
+        #capture-area.dark-card .grid-cell,
+        #capture-area.dark-card .grid-time {
+            border-right: 1px solid rgba(255,255,255,0.12);
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+        }
+        #capture-area.dark-card .grid-header {
+            background-color: #1b2029;
+            color: #f5f6f8;
+        }
+        #capture-area.dark-card .grid-time {
+            background-color: #1b2029;
+            color: #b8bcc4;
+        }
+        @media (hover: hover) and (pointer: fine) {
+            #capture-area.dark-card .grid-cell:hover { background-color: #232a35; }
+        }
+        #capture-area.dark-card .overlay-empty {
+            background: rgba(20,24,31,0.92);
+            color: #f5f6f8;
+        }
+        /* Event color blocks keep their fills; text is already light. */
+        #capture-area.dark-card .event { color: #fff; }
+        #capture-area.dark-card .c-yellow,
+        #capture-area.dark-card .c-yellow .event-time,
+        #capture-area.dark-card .c-yellow span { color: #333; }
+
+        /* Mobile dark grid: sticky time column must stay dark */
+        @media (max-width: 768px) {
+            #capture-area.dark-card .grid-scroll .time-label {
+                background-color: #1b2029;
+            }
+        }
+
+        /* ============================================== */
+        /* =====  GIRLY POP MODE (Natasha only)     ===== */
+        /* ===== screen-only; PNG exports unchanged ===== */
+        /* ============================================== */
+        body.girly-pop {
+            --primary-navy: #e60073;
+            --text-dark:    #7a1f55;
+            --bg-light:     #fff0f8;
+            --grid-border:  #ffc6e6;
+            --accent-gold:  #ff5fb0;
+            background: radial-gradient(ellipse at center, #ffd9ee 0%, #ff9ed6 60%, #ff7ec4 100%) fixed !important;
+            color: #7a1f55;
+        }
+
+        /* Welcome overlay */
+        body.girly-pop #welcome-overlay {
+            background: radial-gradient(ellipse at center, #ff8fcf 0%, #ff4da6 55%, #d6006e 100%);
+        }
+        body.girly-pop #welcome-overlay::before {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.75), transparent);
+        }
+        body.girly-pop #welcome-greeting { color: #fff; font-weight: 600; }
+        body.girly-pop #welcome-greeting .gp-name {
+            color: #fff7c4; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        body.girly-pop #welcome-logo .brand-big { color: #fff; }
+        body.girly-pop #welcome-logo .brand-big .dot { color: #fff3b0; }
+        body.girly-pop #welcome-logo .brand-sub,
+        body.girly-pop #welcome-logo .brand-tagline { color: #ffe1f2; }
+        body.girly-pop .welcome-credits { color: #fff0f8; }
+        #welcome-slay {
+            font-size: 2.1rem; font-weight: 600; color: #fff; letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+
+        /* Tabs */
+        body.girly-pop .tab-container { border-bottom: 1px solid rgba(230,0,115,0.18); }
+        body.girly-pop .tab { background: #ffd1ec; color: #b3046a; border-color: #ffb3de; }
+        body.girly-pop .tab:hover { background: #ffe0f3; color: #80033f; }
+        body.girly-pop .tab.active {
+            background: #fff5fb; color: #e60073; border-top: 1px solid transparent;
+            box-shadow: inset 0 3px 0 #ff5fb0;
+            border-left: 1px solid #ffb3de; border-right: 1px solid #ffb3de;
+        }
+        body.girly-pop .tab-rail { background: #ff5fb0; }
+        body.girly-pop .tab-delete { color: #c77; }
+        body.girly-pop .tab-delete:hover { color: #e60073; background: rgba(230,0,115,0.12); }
+        body.girly-pop .add-tab-btn { border: 1.5px dashed #e60073; color: #e60073; background: transparent; }
+        body.girly-pop .add-tab-btn:hover { background: rgba(230,0,115,0.10); }
+
+        /* Controls + inputs */
+        body.girly-pop .controls {
+            background: #fff5fb; border: 1px solid #ffc6e6;
+            box-shadow: 0 4px 16px rgba(230,0,115,0.18);
+        }
+        body.girly-pop .input-group label { color: #b3046a; }
+        body.girly-pop .input-group input,
+        body.girly-pop .input-group select {
+            background: #fff; color: #7a1f55; border: 1px solid #ffb3de;
+        }
+        body.girly-pop .input-group input::placeholder { color: #d98cbf; }
+        body.girly-pop .input-group input:focus,
+        body.girly-pop .input-group select:focus {
+            border-color: #e60073; box-shadow: 0 0 0 2px rgba(230,0,115,0.25);
+        }
+        body.girly-pop .input-group select option { background: #fff; color: #7a1f55; }
+
+        /* Toggle switch */
+        body.girly-pop .slider { background-color: #ffb3de; }
+        body.girly-pop input:checked + .slider { background-color: #e60073; }
+
+        /* Buttons */
+        body.girly-pop .btn-primary { background: linear-gradient(135deg, #ff4da6, #e60073); color: #fff; }
+        body.girly-pop .btn-primary:hover { background: linear-gradient(135deg, #e60073, #c2005f); }
+        body.girly-pop .btn-danger { background: linear-gradient(135deg, #ff6f91, #ff3d6e); color: #fff; }
+        body.girly-pop .btn-danger:hover { background: #ff3d6e; }
+        body.girly-pop .btn-secondary { background: #ffe0f3; color: #b3046a; border: 1px solid #ffb3de; }
+        body.girly-pop .btn-secondary:hover { background: #ffd1ec; }
+        body.girly-pop .btn-ghost, body.girly-pop .btn-icon {
+            background: transparent; border: 1px solid #ffb3de; color: #b3046a;
+        }
+        body.girly-pop .btn-ghost:hover, body.girly-pop .btn-icon:hover {
+            background: rgba(230,0,115,0.08); color: #e60073;
+        }
+
+        /* Toast */
+        body.girly-pop #toast {
+            background: #fff5fb; color: #7a1f55; border: 1px solid #ffb3de;
+            box-shadow: 0 8px 24px rgba(230,0,115,0.35);
+        }
+        body.girly-pop #toastUndo { background: #e60073; color: #fff; }
+
+        /* Archive / version list items */
+        body.girly-pop .archive-item, body.girly-pop .version-item { background: #ffe9f5; color: #7a1f55; }
+        body.girly-pop .item-reopen, body.girly-pop .item-restore { background: #e60073; color: #fff; }
+        body.girly-pop .item-reopen:hover, body.girly-pop .item-restore:hover { background: #c2005f; }
+        body.girly-pop .version-item .ver-meta .ver-label { color: #b3046a; }
+        body.girly-pop .version-item .ver-meta .ver-time { color: #c77fa6; }
+        body.girly-pop .archive-empty { color: #c77fa6; }
+
+        /* Modals */
+        body.girly-pop .modal {
+            background: #fff5fb; color: #7a1f55; border: 1px solid #ffb3de;
+            box-shadow: 0 10px 30px rgba(230,0,115,0.35);
+        }
+        body.girly-pop .modal h3 { color: #e60073; }
+        body.girly-pop .modal label, body.girly-pop .modal p { color: #b3046a; }
+        body.girly-pop .modal select,
+        body.girly-pop .modal input[type="text"],
+        body.girly-pop .modal input[type="email"] {
+            background: #fff; color: #7a1f55; border: 1px solid #ffb3de;
+        }
+        body.girly-pop .modal input::placeholder { color: #d98cbf; }
+        body.girly-pop .day-checkboxes label { background: #fff0f8; color: #b3046a; border: 1px solid #ffb3de; }
+        body.girly-pop .day-checkboxes input:checked + label { background: #e60073; color: #fff; border-color: #e60073; }
+
+        /* On-screen schedule card -- scoped to .dark-card so PNG EXPORTS stay on-brand */
+        body.girly-pop #capture-area.dark-card {
+            background: #fff5fb; border: 1px solid #ffc6e6;
+            box-shadow: 0 10px 30px rgba(230,0,115,0.25);
+        }
+        body.girly-pop #capture-area.dark-card header { border-bottom: 2px solid #ff5fb0; }
+        body.girly-pop #capture-area.dark-card .brand-logo { color: #e60073; }
+        body.girly-pop #capture-area.dark-card .brand-logo .dot { color: #ff5fb0; }
+        body.girly-pop #capture-area.dark-card .brand-logo .subtext { color: #b3046a; }
+        body.girly-pop #capture-area.dark-card .schedule-info h1 { color: #e60073; }
+        body.girly-pop #capture-area.dark-card .schedule-info p { color: #b3046a; }
+        body.girly-pop #capture-area.dark-card #userStatus { color: #b3046a !important; }
+        body.girly-pop #capture-area.dark-card .grid {
+            border-top: 1px solid #ffc6e6; border-left: 1px solid #ffc6e6;
+        }
+        body.girly-pop #capture-area.dark-card .grid-header,
+        body.girly-pop #capture-area.dark-card .grid-cell,
+        body.girly-pop #capture-area.dark-card .grid-time {
+            border-right: 1px solid #ffc6e6; border-bottom: 1px solid #ffc6e6;
+        }
+        body.girly-pop #capture-area.dark-card .grid-header { background-color: #ffe3f3; color: #e60073; }
+        body.girly-pop #capture-area.dark-card .grid-time { background-color: #ffe3f3; color: #b3046a; }
+        @media (hover: hover) and (pointer: fine) {
+            body.girly-pop #capture-area.dark-card .grid-cell:hover { background-color: #ffd1ec; }
+        }
+        body.girly-pop #capture-area.dark-card .overlay-empty { background: rgba(255,240,248,0.94); color: #7a1f55; }
+
+        /* Mobile pink grid: sticky time column must stay pink */
+        @media (max-width: 768px) {
+            body.girly-pop #capture-area.dark-card .grid-scroll .time-label {
+                background-color: #ffe3f3;
+            }
+        }
+
+        /* The Natasha-only toggle button */
+        #girlyPopBtn {
+            padding: 6px 14px; font-size: 0.8rem; border-radius: 20px; font-weight: 700;
+            background: linear-gradient(135deg, #ff7ec4, #e60073); color: #fff;
+            box-shadow: 0 3px 10px rgba(230,0,115,0.35);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            #girlyPopBtn:hover { transform: scale(1.04); }
+        }
+
+        /* ============================================== */
+        /* ===== SLEEK UI ADDITIONS                 ===== */
+        /* ============================================== */
+
+        /* The ✨ Daily Motivation button (separate access grant) */
+        #motivationBtn {
+            padding: 6px 14px; font-size: 0.8rem; border-radius: 20px; font-weight: 700;
+            background: linear-gradient(135deg, #e6c14d, #b8860b); color: #14181f;
+            box-shadow: 0 3px 10px rgba(212,175,55,0.35);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            #motivationBtn:hover { transform: scale(1.04); }
+        }
+
+        /* "⋯ More" dropdown menu */
+        .more-wrap { position: relative; }
+        .more-menu {
+            display: none; position: absolute; top: calc(100% + 6px); right: 0;
+            flex-direction: column; gap: 2px; min-width: 230px; padding: 6px;
+            background: #1b2029; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+            box-shadow: 0 10px 26px rgba(0,0,0,0.5); z-index: 600;
+        }
+        .more-menu.open { display: flex; }
+        .more-menu button {
+            background: transparent; color: #d6dae1; text-align: left;
+            padding: 9px 12px; border-radius: 6px; font-size: 0.85rem; width: 100%;
+            border: none;
+        }
+        .more-menu button:hover { background: rgba(255,255,255,0.07); color: #fff; }
+        .more-menu .menu-divider { height: 1px; background: rgba(255,255,255,0.10); margin: 4px 6px; }
+
+        /* Paired inputs: invisible on desktop, side-by-side on mobile */
+        .control-pair { display: contents; }
+
+        /* Active color swatch gets a visible check */
+        .color-swatch { position: relative; }
+        .color-swatch.active::after {
+            content: '✓'; position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 800; color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+        }
+        .color-swatch.c-yellow.active::after { color: #333; text-shadow: none; }
+
+        @media (max-width: 768px) {
+            .control-pair { display: flex; gap: 12px; width: 100%; }
+            .control-pair .input-group { flex: 1 1 0; min-width: 0; }
+            .btn-group .more-wrap { flex: 1 1 auto; min-width: 120px; }
+            .btn-group .more-wrap > #btnMore { width: 100%; }
+            /* On mobile the More button sits on the LEFT, so anchor the
+               menu to its left edge instead of its right. */
+            .btn-group .more-wrap .more-menu { left: 0; right: auto; }
+        }
+
+        /* Girly Pop variants for the new components */
+        body.girly-pop .more-menu {
+            background: #fff5fb; border-color: #ffb3de;
+            box-shadow: 0 10px 26px rgba(230,0,115,0.25);
+        }
+        body.girly-pop .more-menu button { color: #b3046a; }
+        body.girly-pop .more-menu button:hover { background: rgba(230,0,115,0.08); color: #e60073; }
+        body.girly-pop .more-menu .menu-divider { background: #ffd1ec; }
+
+    </style>
+</head>
+<body class="intro-running">
+
+    <!-- ============================== -->
+    <!-- ===== WELCOME / LANDING ====== -->
+    <!-- ============================== -->
+    <div id="welcome-overlay" aria-hidden="true">
+        <div id="welcome-greeting" class="welcome-stage">
+            Welcome<span id="welcome-name-suffix"></span>
+        </div>
+        <div id="welcome-slay" class="welcome-stage">
+            You are slaying every day ✨
+        </div>
+        <div id="welcome-logo" class="welcome-stage">
+            <div class="brand-big">GENIUS<span class="dot">.</span></div>
+            <div class="brand-sub">PREMIUM TUITION</div>
+            <div class="brand-tagline">Schedule Maker</div>
+        </div>
+        <div class="welcome-credits">developed by zak.k<br>envisioned by james.r</div>
+    </div>
+
+    <script>
+        // Runs immediately on page load — does NOT depend on Firebase.
+        // Uses a cached name from a previous session so returning users
+        // see "Welcome, [Name]" without waiting for auth.
+        (function runIntroSequence() {
+            const overlay  = document.getElementById('welcome-overlay');
+            const greeting = document.getElementById('welcome-greeting');
+            const nameSpan = document.getElementById('welcome-name-suffix');
+            const slay     = document.getElementById('welcome-slay');
+            const logo     = document.getElementById('welcome-logo');
+
+            // The full intro is a lovely first impression and a tax on the
+            // fiftieth. Run it once a day; every reload after that drops
+            // straight into the app. Reduced-motion users always skip it.
+            // NB: only the animation is skipped — every window.* helper below
+            // is still defined, because auth and the access panel call them.
+            // Local date, not toISOString() — that returns UTC, so in SAST
+            // (UTC+2) anything before 02:00 would still read as yesterday and
+            // replay the intro.
+            const _n = new Date();
+            const today = _n.getFullYear() + '-' +
+                String(_n.getMonth() + 1).padStart(2, '0') + '-' +
+                String(_n.getDate()).padStart(2, '0');
+            const skipIntro =
+                localStorage.getItem('genius_introSeenOn') === today ||
+                window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            localStorage.setItem('genius_introSeenOn', today);
+
+            // Pull cached first name (saved by the auth handler last visit)
+            const cachedName = localStorage.getItem('genius_lastFirstName');
+            // Did Natasha turn on Girly Pop mode on a previous visit?
+            const girlyPop = localStorage.getItem('genius_girlyPop') === 'true';
+
+            // Apply the pink theme immediately so the welcome page is girly too
+            if (girlyPop) document.body.classList.add('girly-pop');
+
+            // Always cache the name for next visit; only touch the DOM in normal mode
+            window.__setWelcomeName = function (firstName) {
+                if (!firstName) return;
+                localStorage.setItem('genius_lastFirstName', firstName);
+                if (!girlyPop && greeting && !greeting.classList.contains('is-leaving')) {
+                    nameSpan.textContent = ', ' + firstName;
+                    nameSpan.style.color = 'var(--accent-gold)';
+                    nameSpan.style.fontWeight = '500';
+                }
+            };
+
+            // ---- Girly Pop control helpers (Natasha only) ----
+            window.applyGirlyPop = function (on) {
+                document.body.classList.toggle('girly-pop', on);
+                localStorage.setItem('genius_girlyPop', on ? 'true' : 'false');
+                const b = document.getElementById('girlyPopBtn');
+                if (b) b.innerText = on ? '🧡 Girly Pop: ON' : '🎀 Turn UI Pink';
+            };
+            window.toggleGirlyPop = function () {
+                window.applyGirlyPop(!document.body.classList.contains('girly-pop'));
+            };
+            // Show the button only for users granted PINK_UI access in the
+            // ACCESS CONTROL PANEL at the top of this file; for any OTHER
+            // signed-in user, strip the theme.
+            window.updateGirlyPopAccess = function (email) {
+                const b = document.getElementById('girlyPopBtn');
+                if (!b) return;
+                const allowed = !!(email && window.ACCESS
+                    && Array.isArray(window.ACCESS.PINK_UI_USERS)
+                    && window.ACCESS.PINK_UI_USERS.includes(email));
+                if (allowed) {
+                    b.style.display = 'inline-block';
+                    const on = document.body.classList.contains('girly-pop');
+                    b.innerText = on ? '🧡 Girly Pop: ON' : '🎀 Turn UI Pink';
+                } else {
+                    b.style.display = 'none';
+                    if (email) { // a non-granted real user is signed in -> revert pink
+                        document.body.classList.remove('girly-pop');
+                        localStorage.removeItem('genius_girlyPop');
+                    }
+                }
+            };
+
+            // ---- Daily Motivation (separate access grant) ----
+            // Controlled by MOTIVATION_USERS + MOTIVATION_URL in the
+            // ACCESS CONTROL PANEL at the top of this file.
+            window.updateMotivationAccess = function (email) {
+                const b = document.getElementById('motivationBtn');
+                if (!b) return;
+                const allowed = !!(email && window.ACCESS
+                    && Array.isArray(window.ACCESS.MOTIVATION_USERS)
+                    && window.ACCESS.MOTIVATION_USERS.includes(email));
+                b.style.display = allowed ? 'inline-block' : 'none';
+            };
+            window.openMotivation = function () {
+                if (window.ACCESS && window.ACCESS.MOTIVATION_URL) {
+                    window.open(window.ACCESS.MOTIVATION_URL, '_blank', 'noopener');
+                }
+            };
+
+            if (skipIntro) {
+                // Already greeted today — tear the overlay down before paint
+                // so there's nothing to see rather than a flash of one.
+                if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                document.body.classList.remove('intro-running');
+            } else if (girlyPop) {
+                // ===== GIRLY POP WELCOME =====
+                greeting.innerHTML = 'Welcome girly pop <span class="gp-name">'
+                    + (cachedName || 'Natasha') + '</span> 💖';
+                //   80ms : Welcome girly pop Natasha fades in
+                // 1100ms : greeting fades out
+                // 1500ms : You are slaying every day fades in
+                // 2500ms : slay fades out
+                // 2900ms : logo fades in
+                // 3900ms : logo fades out
+                // 4200ms : overlay fades out
+                // 5000ms : overlay removed
+                setTimeout(() => greeting.classList.add('is-active'), 80);
+                setTimeout(() => {
+                    greeting.classList.remove('is-active');
+                    greeting.classList.add('is-leaving');
+                }, 1100);
+                setTimeout(() => slay.classList.add('is-active'), 1500);
+                setTimeout(() => {
+                    slay.classList.remove('is-active');
+                    slay.classList.add('is-leaving');
+                }, 2500);
+                setTimeout(() => logo.classList.add('is-active'), 2900);
+                setTimeout(() => {
+                    logo.classList.remove('is-active');
+                    logo.classList.add('is-leaving');
+                }, 3900);
+                setTimeout(() => overlay.classList.add('is-hidden'), 4200);
+                setTimeout(() => {
+                    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                    document.body.classList.remove('intro-running');
+                }, 5000);
+            } else {
+                // ===== STANDARD WELCOME =====
+                if (cachedName) {
+                    nameSpan.textContent = ', ' + cachedName;
+                    nameSpan.classList.add('accent');
+                    nameSpan.style.color = 'var(--accent-gold)';
+                    nameSpan.style.fontWeight = '500';
+                }
+                setTimeout(() => greeting.classList.add('is-active'), 80);
+                setTimeout(() => {
+                    greeting.classList.remove('is-active');
+                    greeting.classList.add('is-leaving');
+                }, 900);
+                setTimeout(() => logo.classList.add('is-active'), 1300);
+                setTimeout(() => {
+                    logo.classList.remove('is-active');
+                    logo.classList.add('is-leaving');
+                }, 2200);
+                setTimeout(() => overlay.classList.add('is-hidden'), 2500);
+                setTimeout(() => {
+                    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                    document.body.classList.remove('intro-running');
+                }, 3300);
+            }
+        })();
+    </script>
+    <!-- ============================== -->
+
+    <div class="tab-container" id="tabsContainer" data-html2canvas-ignore="true"></div>
+
+    <div class="controls" data-html2canvas-ignore="true">
+        <div class="input-group">
+            <label>Student Name</label>
+            <input type="text" id="studentName" placeholder="e.g. Jacob Keyes" onkeyup="handleInputUpdate()">
+        </div>
+        <div class="input-group">
+            <label>Week Commencing</label>
+            <input type="date" id="weekDate" onchange="handleInputUpdate()">
+        </div>
+        <div class="control-pair">
+            <div class="input-group">
+                <label>Start Time</label>
+                <select id="timeStart" onchange="handleTimeUpdate()"></select>
+            </div>
+            <div class="input-group">
+                <label>End Time</label>
+                <select id="timeEnd" onchange="handleTimeUpdate()"></select>
+            </div>
+        </div>
+        <div class="control-pair">
+            <div class="input-group">
+                <label>Weekends</label>
+                <div style="height: 40px; display: flex; align-items: center;">
+                    <label class="switch">
+                        <input type="checkbox" id="toggleWeekends" onchange="handleWeekendToggle()" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Download Theme</label>
+                <select id="themeSelect" onchange="setTheme(this.value)" title="Selecting a theme flashes a quick preview on the schedule card">
+                    <option value="none">Default</option>
+                    <option value="storybook">📕 Storybook Stripes</option>
+                    <option value="space">🚀 Space Explorer</option>
+                    <option value="jungle">🦁 Jungle Safari</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <div class="more-wrap">
+                <button id="btnMore" class="btn-secondary" onclick="toggleMoreMenu(event)">⋯ More</button>
+                <div id="moreMenu" class="more-menu">
+                    <button id="btnArchive" onclick="archiveCurrent(); closeMoreMenu();">📥 Archive this schedule</button>
+                    <button id="btnSentWeek" title="Have you sent your schedule through this week? This moves it to the Sent list." onclick="markSentThisWeek(); closeMoreMenu();">✓ Mark Sent this week</button>
+                    <div class="menu-divider"></div>
+                    <button id="btnOpenArchive" title="View archived &amp; sent schedules" onclick="openArchiveModal(); closeMoreMenu();">Archive / Sent (0)</button>
+                    <button id="btnVersions" title="Version history" onclick="openVersionsModal(); closeMoreMenu();">🕘 Version History</button>
+                </div>
+            </div>
+            <button id="btnClear" class="btn-danger" onclick="clearCurrentSchedule()">Clear Week</button>
+            <button class="btn-primary" id="exportBtn" onclick="exportSchedule()">Save / Export</button>
+        </div>
+    </div>
+
+    <div class="schedule-wrapper dark-card" id="capture-area">
+        <div id="emptyOverlay" class="overlay-empty">
+            <span style="font-size: 3rem; margin-bottom: 10px;">📭</span>
+            No active schedules.<br>
+            <span style="font-size: 0.9rem; font-weight: normal; margin-top: 5px;">Add a student to start building a schedule, or reopen one from ⋯ More → Archive / Sent.</span>
+        </div>
+
+        <header>
+            <div class="brand-logo">GENIUS<span class="dot">.</span><span class="subtext">PREMIUM TUITION</span></div>
+
+            <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                <div class="auth-container" data-html2canvas-ignore="true">
+                    <button id="motivationBtn" onclick="openMotivation()" style="display:none;">✨ Daily Motivation</button>
+                    <button id="girlyPopBtn" onclick="toggleGirlyPop()" style="display:none;">🎀 Turn UI Pink</button>
+                    <span id="userStatus" style="font-size: 0.8rem; font-weight: 600; color: #666;">Offline Mode (Local)</span>
+                    <button id="auth-btn" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent-gold); color: #fff;">Login to Cloud Sync</button>
+                </div>
+
+                <div class="schedule-info">
+                    <h1 id="outName">Student Schedule</h1>
+                    <p id="outDate">Week Commencing: ---</p>
+                    <p id="outOwner" data-html2canvas-ignore="true" style="display:none; color: var(--accent-gold); font-size: 0.8rem; margin-top: 3px;">Owner: ...</p>
+                </div>
+            </div>
+        </header>
+        <div class="grid-scroll">
+            <div class="grid" id="scheduleGrid"></div>
+        </div>
+    </div>
+
+    <footer class="app-credits" data-html2canvas-ignore="true">developed by zak.k &middot; envisioned by james.r</footer>
+
+    <!-- Event Modal -->
+    <div class="modal-overlay" id="eventModal">
+        <div class="modal">
+            <h3 id="modalTitle">Add Lesson</h3>
+
+            <div id="bulkDaysWrapper">
+                <label>Days</label>
+                <div class="day-checkboxes">
+                    <label><input type="checkbox" id="chkDay2" value="2"> Mon</label>
+                    <label><input type="checkbox" id="chkDay3" value="3"> Tue</label>
+                    <label><input type="checkbox" id="chkDay4" value="4"> Wed</label>
+                    <label><input type="checkbox" id="chkDay5" value="5"> Thu</label>
+                    <label><input type="checkbox" id="chkDay6" value="6"> Fri</label>
+                    <label><input type="checkbox" id="chkDay7" value="7"> Sat</label>
+                    <label><input type="checkbox" id="chkDay8" value="8"> Sun</label>
+                </div>
+            </div>
+
+            <div id="singleDayWrapper" style="display:none;">
+                <label>Day</label>
+                <select id="mSingleDay">
+                    <option value="2">Monday</option>
+                    <option value="3">Tuesday</option>
+                    <option value="4">Wednesday</option>
+                    <option value="5">Thursday</option>
+                    <option value="6">Friday</option>
+                    <option value="7">Saturday</option>
+                    <option value="8">Sunday</option>
+                </select>
+            </div>
+
+            <label>Start Time</label>
+            <input type="text" id="mStartTime" placeholder="e.g. 17h00">
+
+            <label>End Time</label>
+            <input type="text" id="mEndTime" placeholder="e.g. 18h00">
+
+            <label>Subject</label>
+            <input type="text" id="mSubject" placeholder="e.g. Mathematics, PACT...">
+
+            <label>Tutor Name</label>
+            <input type="text" id="mTutor" placeholder="e.g. Dean Cook">
+
+            <label>Location</label>
+            <input type="text" id="mLocation" list="locationOptions" placeholder="Select or type a location...">
+            <datalist id="locationOptions">
+                <option value="Online"></option>
+                <option value="At Home"></option>
+                <option value="Genius Centre"></option>
+            </datalist>
+
+            <label>Color</label>
+            <input type="hidden" id="mColor" value="c-blue">
+            <div class="color-picker-wrapper">
+                <div class="color-swatch c-blue active" data-color="c-blue" onclick="selectColor(this)"></div>
+                <div class="color-swatch c-green" data-color="c-green" onclick="selectColor(this)"></div>
+                <div class="color-swatch c-red" data-color="c-red" onclick="selectColor(this)"></div>
+                <div class="color-swatch c-purple" data-color="c-purple" onclick="selectColor(this)"></div>
+                <div class="color-swatch c-yellow" data-color="c-yellow" onclick="selectColor(this)"></div>
+                <div class="color-swatch c-orange" data-color="c-orange" onclick="selectColor(this)"></div>
+                <div class="color-swatch c-teal" data-color="c-teal" onclick="selectColor(this)"></div>
+                <div class="color-swatch c-mint" data-color="c-mint" onclick="selectColor(this)"></div>
+                <div class="color-swatch c-indigo" data-color="c-indigo" onclick="selectColor(this)"></div>
+                <div class="color-swatch c-rose" data-color="c-rose" onclick="selectColor(this)"></div>
+                <div class="color-swatch c-gray" data-color="c-gray" onclick="selectColor(this)"></div>
+            </div>
+
+            <div class="btn-group" style="justify-content: flex-end; width: 100%;">
+                <button style="background:#ccc; color:#333;" onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" id="saveBtn" onclick="saveEvent()">Add Lesson(s)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Dialog Modal -->
+    <div class="modal-overlay" id="dialogModal" style="z-index: 2000;">
+        <div class="modal" style="text-align: center;">
+            <h3 id="dialogTitle">Confirm</h3>
+            <p id="dialogMessage" style="margin-bottom: 20px; color: #b8bcc4;"></p>
+            <div class="btn-group" style="justify-content: center;">
+                <button id="dialogCancel" style="background:#ccc; color:#333;">Cancel</button>
+                <button id="dialogConfirm" class="btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Archive / Sent Modal -->
+    <div class="modal-overlay" id="archiveModal" data-html2canvas-ignore="true">
+        <div class="modal">
+            <h3>Archive &amp; Sent</h3>
+            <p style="font-size: 0.8rem; color: #b8bcc4; margin-bottom: 15px;">Reopen a schedule to move it back into your active tabs, or delete it permanently.</p>
+
+            <label>Archived</label>
+            <div id="archiveListArchived" style="margin-bottom: 15px; max-height: 160px; overflow-y: auto; background: #1b2029; padding: 5px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08);"></div>
+
+            <label>Sent this week</label>
+            <div id="archiveListSent" style="margin-bottom: 15px; max-height: 160px; overflow-y: auto; background: #1b2029; padding: 5px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08);"></div>
+
+            <div class="btn-group" style="justify-content: flex-end; width: 100%;">
+                <button style="background:#ccc; color:#333;" onclick="closeArchiveModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Versions Modal -->
+    <div class="modal-overlay" id="versionsModal" data-html2canvas-ignore="true">
+        <div class="modal">
+            <h3>Version History</h3>
+            <p style="font-size: 0.8rem; color: #b8bcc4; margin-bottom: 15px;">Save a snapshot of this schedule, then restore it later. Restoring auto-saves the current state first.</p>
+
+            <div style="display: flex; gap: 5px; margin-bottom: 15px; align-items: center;">
+                <input type="text" id="versionLabelInput" placeholder="Optional label (e.g. Final draft)" style="flex:1; margin:0;">
+                <button class="btn-primary" onclick="saveCurrentAsVersion()" style="padding: 8px 12px; white-space: nowrap;">Save version</button>
+            </div>
+
+            <label>Saved versions</label>
+            <div id="versionsList" style="margin-bottom: 15px; max-height: 200px; overflow-y: auto; background: #1b2029; padding: 5px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08);"></div>
+
+            <div class="btn-group" style="justify-content: flex-end; width: 100%;">
+                <button style="background:#ccc; color:#333;" onclick="closeVersionsModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Student Modal (replaces the raw browser prompt) -->
+    <div class="modal-overlay" id="addStudentModal" data-html2canvas-ignore="true">
+        <div class="modal">
+            <h3>Add Student</h3>
+            <label>Student Name</label>
+            <input type="text" id="newStudentNameInput" placeholder="e.g. Jacob Keyes">
+            <div class="btn-group" style="justify-content: flex-end; width: 100%;">
+                <button style="background:#ccc; color:#333;" onclick="closeAddStudentModal()">Cancel</button>
+                <button class="btn-primary" onclick="confirmAddStudent()">Add Student</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast (with optional Undo) -->
+    <div id="toast" data-html2canvas-ignore="true">
+        <span id="toastMsg"></span>
+        <button id="toastUndo" type="button">Undo</button>
+        <span id="toastRail"></span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const isCanvas = typeof __firebase_config !== 'undefined';
+        let firebaseConfig = isCanvas ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyBvFSgHf04mEm8fBsfkc0umWv0J_UjB7j4",
+            authDomain: "schedulemaker-c212c.firebaseapp.com",
+            projectId: "schedulemaker-c212c",
+            storageBucket: "schedulemaker-c212c.firebasestorage.app",
+            messagingSenderId: "91220803760",
+            appId: "1:91220803760:web:f0ddb2a415a2f7394b3b75"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'genius-schedules';
+
+        let currentUser = null;
+        const grid = document.getElementById('scheduleGrid');
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+        // Core State
+        let appMode = 'personal';
+
+        let personalData = { activeTab: null, students: {} };
+        let sharedStudents = {};
+        let sharedMeta = {};
+        let activeSharedTab = null;
+
+        let editingEventId = null;
+        let draggedEventId = null;
+        let justSavedGroupId = null;   // marks the lesson that should animate in
+        let unsubscribePersonal = null;
+        let unsubscribeShared = null;
+
+        // ================================================
+        // ===== MOTION HELPERS                       =====
+        // ================================================
+        const prefersReducedMotion = () =>
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const MODAL_EXIT_MS = 150;   // must match --d-exit
+
+        // requestAnimationFrame never fires in a hidden or backgrounded tab.
+        // Anything that waits on a frame purely to let layout settle needs a
+        // timer fallback, or it stalls forever the moment the tab loses focus.
+        function nextFrame(fn) {
+            let ran = false;
+            const once = () => { if (!ran) { ran = true; fn(); } };
+            requestAnimationFrame(once);
+            setTimeout(once, 120);
+        }
+
+        // Modals are display:none/flex, which can't be transitioned directly.
+        // These wrap the display flip so .is-open gets a frame to animate in,
+        // and hold display:flex until the exit transition has finished.
+        function openOverlay(ref) {
+            const el = typeof ref === 'string' ? document.getElementById(ref) : ref;
+            if (!el) return;
+            if (el._closeTimer) { clearTimeout(el._closeTimer); el._closeTimer = null; }
+            el.style.display = 'flex';
+            void el.offsetWidth;              // commit display before animating
+            el.classList.add('is-open');
+        }
+
+        function closeOverlay(ref) {
+            const el = typeof ref === 'string' ? document.getElementById(ref) : ref;
+            if (!el) return;
+            el.classList.remove('is-open');
+            if (el._closeTimer) clearTimeout(el._closeTimer);
+            el._closeTimer = setTimeout(() => {
+                el.style.display = 'none';
+                el._closeTimer = null;
+            }, prefersReducedMotion() ? 0 : MODAL_EXIT_MS);
+        }
+
+        // Expose to window
+        window.clearCurrentSchedule = clearCurrentSchedule;
+        window.exportSchedule = exportSchedule;
+        window.handleInputUpdate = handleInputUpdate;
+        window.handleTimeUpdate = handleTimeUpdate;
+        window.handleWeekendToggle = handleWeekendToggle;
+        window.createNewTab = createNewTab;
+        window.switchTab = switchTab;
+        window.deleteTab = deleteTab;
+        window.openModalForAdd = openModalForAdd;
+        window.openModalForEdit = openModalForEdit;
+        window.closeModal = closeModal;
+        window.saveEvent = saveEvent;
+        window.deleteEvent = deleteEvent;
+        window.selectColor = selectColor;
+        // New feature bridges
+        window.archiveCurrent = archiveCurrent;
+        window.markSentThisWeek = markSentThisWeek;
+        window.openArchiveModal = openArchiveModal;
+        window.closeArchiveModal = closeArchiveModal;
+        window.reopenSchedule = reopenSchedule;
+        window.deleteArchivedSchedule = deleteArchivedSchedule;
+        window.openVersionsModal = openVersionsModal;
+        window.closeVersionsModal = closeVersionsModal;
+        window.saveCurrentAsVersion = saveCurrentAsVersion;
+        window.restoreVersion = restoreVersion;
+        window.deleteVersion = deleteVersion;
+        window.setTheme = setTheme;
+        window.closeAddStudentModal = closeAddStudentModal;
+        window.confirmAddStudent = confirmAddStudent;
+        window.toggleMoreMenu = toggleMoreMenu;
+        window.closeMoreMenu = closeMoreMenu;
+
+        // Data Helpers
+        function getMySchedules() {
+            let result = {};
+            if (personalData && personalData.students) {
+                Object.assign(result, personalData.students);
+            }
+            // Add shared schedules that I own to my personal list
+            for (let id in sharedStudents) {
+                if (sharedMeta[id] && currentUser && sharedMeta[id].ownerId === currentUser.uid) {
+                    result[id] = sharedStudents[id];
+                }
+            }
+            return result;
+        }
+
+        function getSharedInbox() {
+            let result = {};
+            // Only show shared schedules that someone ELSE owns
+            for (let id in sharedStudents) {
+                if (sharedMeta[id] && currentUser && sharedMeta[id].ownerId !== currentUser.uid) {
+                    result[id] = sharedStudents[id];
+                }
+            }
+            return result;
+        }
+
+        function getActiveData() {
+            if (appMode === 'personal') return getMySchedules()[personalData.activeTab];
+            return getSharedInbox()[activeSharedTab];
+        }
+
+        function getActiveTabId() {
+            return appMode === 'personal' ? personalData.activeTab : activeSharedTab;
+        }
+
+        function setActiveTabId(id) {
+            if (appMode === 'personal') personalData.activeTab = id;
+            else activeSharedTab = id;
+        }
+
+        // Backward-compatible migration: ensure every student has the new fields.
+        function migrateStudents(dataObj) {
+            if (!dataObj || !dataObj.students) return dataObj;
+            Object.keys(dataObj.students).forEach(id => {
+                const s = dataObj.students[id];
+                if (!s) return;
+                if (typeof s.status === 'undefined' || s.status === null) s.status = 'active';
+                if (!Array.isArray(s.versions)) s.versions = [];
+                if (typeof s.theme === 'undefined' || s.theme === null) s.theme = 'none';
+            });
+            return dataObj;
+        }
+
+        // Derive a friendly first name from a Firebase user
+        function deriveFirstName(user) {
+            if (!user) return null;
+            if (user.displayName) {
+                const first = user.displayName.trim().split(/\s+/)[0];
+                if (first) return first;
+            }
+            if (user.email) {
+                const local = user.email.split('@')[0];
+                // Strip trailing digits / punctuation, capitalize
+                const cleaned = local.replace(/[._\-]+/g, ' ').replace(/\d+$/, '').trim();
+                const first = cleaned.split(/\s+/)[0];
+                if (first) return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+            }
+            return null;
+        }
+
+        // Custom Dialog
+        function showDialog(title, message, isConfirm, callback) {
+            document.getElementById('dialogTitle').innerText = title;
+            document.getElementById('dialogMessage').innerText = message;
+            document.getElementById('dialogCancel').style.display = isConfirm ? 'inline-block' : 'none';
+
+            const confirmBtn = document.getElementById('dialogConfirm');
+            const cancelBtn = document.getElementById('dialogCancel');
+
+            confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+            cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+
+            document.getElementById('dialogConfirm').onclick = () => {
+                closeOverlay('dialogModal');
+                if(callback) callback(true);
+            };
+            document.getElementById('dialogCancel').onclick = () => {
+                closeOverlay('dialogModal');
+                if(callback) callback(false);
+            };
+            openOverlay('dialogModal');
+        }
+
+        // --- Auth & Listeners ---
+        async function initAuth() {
+            if (isCanvas) {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            }
+        }
+        initAuth().catch(console.error);
+
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+
+            // Special-access buttons (see ACCESS CONTROL PANEL at top of file)
+            if (typeof window.updateGirlyPopAccess === 'function') {
+                window.updateGirlyPopAccess(user && user.email ? user.email : null);
+            }
+            if (typeof window.updateMotivationAccess === 'function') {
+                window.updateMotivationAccess(user && user.email ? user.email : null);
+            }
+
+            const btn = document.getElementById('auth-btn');
+            const status = document.getElementById('userStatus');
+
+            // Update the welcome overlay name if it's still on screen
+            const firstName = deriveFirstName(user);
+            if (firstName && typeof window.__setWelcomeName === 'function') {
+                window.__setWelcomeName(firstName);
+            }
+
+            // Capture ?shared=ID from URL if present
+            const urlParams = new URLSearchParams(window.location.search);
+            const sharedId = urlParams.get('shared');
+            if (sharedId) {
+                window._pendingSharedId = sharedId;
+                window.history.replaceState({}, document.title, window.location.pathname); // Clean URL
+            }
+
+            if (user && user.isAnonymous === false) {
+                btn.innerText = "Logout";
+                btn.style.background = "#e74c3c";
+                status.innerText = `Synced securely as ${user.email ? user.email.split('@')[0] : 'User'}`;
+                btn.onclick = () => { signOut(auth).then(() => window.location.reload()); };
+                setupCloudListeners();
+            } else if (user && isCanvas) {
+                btn.style.display = 'none';
+                status.innerText = `Cloud Sync Active (Canvas)`;
+                if(!user.email) user.email = "demo@canvas.app";
+                setupCloudListeners();
+            } else {
+                btn.innerText = "Login to Cloud Sync";
+                btn.style.background = "var(--accent-gold)";
+                status.innerText = "Offline Mode (Local)";
+                btn.onclick = () => {
+                    if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+                        showDialog("Setup Required", "Please paste your Firebase Config keys in the HTML.", false);
+                        return;
+                    }
+                    signInWithPopup(auth, new GoogleAuthProvider()).catch(err => {
+                        console.error(err);
+                        showDialog("Login Failed", "Could not connect to Google.", false);
+                    });
+                };
+                loadLocalData();
+            }
+        });
+
+        function setupCloudListeners() {
+            populateTimeDropdowns();
+
+            if(unsubscribePersonal) unsubscribePersonal();
+            const personalRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'schedules', 'main');
+            unsubscribePersonal = onSnapshot(personalRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    personalData = migrateStudents(docSnap.data());
+                    localStorage.setItem('geniusSchedules_v6', JSON.stringify(personalData));
+                } else {
+                    const savedData = localStorage.getItem('geniusSchedules_v6');
+                    if(savedData) personalData = migrateStudents(JSON.parse(savedData));
+                    else createInitialData();
+                    triggerSave();
+                }
+                if(appMode === 'personal') { renderTabs(); loadActiveStudentData(); }
+            }, (err) => console.error(err));
+
+            if(unsubscribeShared) unsubscribeShared();
+            const sharedColRef = collection(db, 'artifacts', appId, 'public', 'data', 'sharedSchedules');
+            unsubscribeShared = onSnapshot(sharedColRef, (snapshot) => {
+                sharedStudents = {};
+                sharedMeta = {};
+
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const isOwner = data.ownerId === currentUser.uid;
+                    const isSharedWithMe = data.sharedWithEmails && data.sharedWithEmails.includes(currentUser.email);
+
+                    if (isOwner || isSharedWithMe) {
+                        sharedStudents[docSnap.id] = data.scheduleData;
+                        sharedMeta[docSnap.id] = {
+                            ownerId: data.ownerId,
+                            ownerEmail: data.ownerEmail,
+                            sharedWithEmails: data.sharedWithEmails
+                        };
+                    }
+                });
+
+                // Shared mode removed (personal-only build): clear any pending id.
+                if (window._pendingSharedId) { window._pendingSharedId = null; }
+
+                // Tab validation after sync
+                if (appMode === 'shared') {
+                    const sharedKeys = Object.keys(getSharedInbox());
+                    if(sharedKeys.length > 0 && !getSharedInbox()[activeSharedTab]) {
+                        activeSharedTab = sharedKeys[0];
+                    } else if (sharedKeys.length === 0) {
+                        activeSharedTab = null;
+                    }
+                } else {
+                    const pKeys = Object.keys(getMySchedules());
+                    if (pKeys.length > 0 && !pKeys.includes(personalData.activeTab)) {
+                        personalData.activeTab = pKeys[0];
+                    } else if (pKeys.length === 0) {
+                        createInitialData();
+                    }
+                }
+                renderTabs();
+                loadActiveStudentData();
+            }, (err) => console.error(err));
+        }
+
+        function loadLocalData() {
+            populateTimeDropdowns();
+            const savedData = localStorage.getItem('geniusSchedules_v6');
+            if (savedData) {
+                personalData = migrateStudents(JSON.parse(savedData));
+            } else {
+                createInitialData();
+            }
+            renderTabs();
+            loadActiveStudentData();
+        }
+
+        function createInitialData() {
+            const initialId = 'student_' + Date.now();
+            personalData.students = {};
+            personalData.students[initialId] = {
+                name: 'New Student', date: '', startHour: 13, endHour: 20, showWeekends: true, events: [],
+                status: 'active', versions: [], theme: 'none'
+            };
+            personalData.activeTab = initialId;
+        }
+
+        // --- Save System ---
+        async function triggerSave() {
+            let activeId = getActiveTabId();
+
+            if (appMode === 'personal') {
+                if (sharedMeta[activeId]) {
+                    // It's a personal schedule that has been shared to the cloud
+                    if(!currentUser || !currentUser.email) return;
+                    const meta = sharedMeta[activeId];
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'sharedSchedules', activeId);
+                    await setDoc(docRef, {
+                        ownerId: meta.ownerId, ownerEmail: meta.ownerEmail,
+                        sharedWithEmails: meta.sharedWithEmails, scheduleData: sharedStudents[activeId]
+                    }).catch(console.error);
+                } else {
+                    // It's purely private
+                    localStorage.setItem('geniusSchedules_v6', JSON.stringify(personalData));
+                    if (currentUser && currentUser.uid) {
+                        const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'schedules', 'main');
+                        await setDoc(docRef, personalData).catch(console.error);
+                    }
+                }
+            } else if (appMode === 'shared' && activeSharedTab) {
+                if(!currentUser || !currentUser.email) return;
+                const meta = sharedMeta[activeSharedTab];
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'sharedSchedules', activeSharedTab);
+                await setDoc(docRef, {
+                    ownerId: meta.ownerId, ownerEmail: meta.ownerEmail,
+                    sharedWithEmails: meta.sharedWithEmails, scheduleData: sharedStudents[activeSharedTab]
+                }).catch(console.error);
+            }
+        }
+
+        // --- UI Rendering ---
+        function populateTimeDropdowns() {
+            const startSel = document.getElementById('timeStart');
+            const endSel = document.getElementById('timeEnd');
+            startSel.innerHTML = ''; endSel.innerHTML = '';
+            for(let i = 4; i <= 23; i++) {
+                let timeStr = `${i.toString().padStart(2, '0')}h00`;
+                startSel.innerHTML += `<option value="${i}">${timeStr}</option>`;
+                endSel.innerHTML += `<option value="${i}">${timeStr}</option>`;
+            }
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('tabsContainer');
+            container.innerHTML = '';
+
+            let dataset = appMode === 'personal' ? getMySchedules() : getSharedInbox();
+            let currentActiveId = getActiveTabId();
+
+            Object.keys(dataset).forEach(id => {
+                const student = dataset[id];
+                // Only show 'active' (missing == active) schedules as tabs
+                if (student && student.status && student.status !== 'active') return;
+                const tab = document.createElement('div');
+                tab.className = `tab ${id === currentActiveId ? 'active' : ''}`;
+                tab.dataset.tabId = id;
+                tab.onclick = () => switchTab(id);
+
+                // Add globe icon if it's an owned-shared schedule rendering in the Personal view
+                let shareIndicator = '';
+                if (appMode === 'personal' && sharedMeta[id]) {
+                    shareIndicator = ' <span style="font-size:0.8rem; margin-left:3px;" title="Live Shared Workspace">🌍</span>';
+                }
+
+                tab.innerHTML = `<span>${student.name || 'Unnamed'}${shareIndicator}</span><span class="tab-delete" onclick="deleteTab('${id}', event)">×</span>`;
+                container.appendChild(tab);
+            });
+
+            if (appMode === 'personal') {
+                const addBtn = document.createElement('button');
+                addBtn.className = 'add-tab-btn'; addBtn.innerText = '+ Add Student';
+                addBtn.onclick = createNewTab; container.appendChild(addBtn);
+            }
+
+            // The rail is rebuilt with the strip, so it lands in place without
+            // animating — there's nothing to travel from on a fresh render.
+            const rail = document.createElement('span');
+            rail.className = 'tab-rail is-instant';
+            container.appendChild(rail);
+            nextFrame(() => positionTabRail(true));
+        }
+
+        // Slides the gold rail under whichever tab is active. `instant` skips
+        // the transition (used on first paint and on resize, where a slide
+        // would be motion without meaning).
+        function positionTabRail(instant) {
+            const container = document.getElementById('tabsContainer');
+            if (!container) return;
+            const rail = container.querySelector('.tab-rail');
+            const active = container.querySelector('.tab.active');
+            if (!rail) return;
+
+            if (!active) { rail.style.opacity = '0'; return; }
+
+            rail.classList.toggle('is-instant', !!instant || prefersReducedMotion());
+            rail.style.opacity = '1';
+            rail.style.width = active.offsetWidth + 'px';
+            rail.style.transform = `translateX(${active.offsetLeft}px)`;
+
+            if (instant) {
+                void rail.offsetWidth;               // flush before re-arming
+                rail.classList.remove('is-instant');
+            }
+        }
+        window.addEventListener('resize', () => positionTabRail(true));
+
+        function switchTab(id) {
+            setActiveTabId(id);
+            triggerSave();
+
+            // Swap the active class in place rather than rebuilding the strip.
+            // A full re-render would replace the rail mid-slide and the motion
+            // would never be seen.
+            const container = document.getElementById('tabsContainer');
+            const target = container && container.querySelector(`.tab[data-tab-id="${id}"]`);
+            if (target) {
+                container.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                target.classList.add('active');
+                positionTabRail(false);
+            } else {
+                renderTabs();
+            }
+
+            loadActiveStudentData();
+        }
+
+        function createNewTab() {
+            if (appMode !== 'personal') return;
+            const input = document.getElementById('newStudentNameInput');
+            input.value = '';
+            openOverlay('addStudentModal');
+            setTimeout(() => input.focus(), 60);
+        }
+
+        function closeAddStudentModal() {
+            closeOverlay('addStudentModal');
+        }
+
+        function confirmAddStudent() {
+            const name = document.getElementById('newStudentNameInput').value.trim();
+            const newId = 'student_' + Date.now();
+            personalData.students[newId] = {
+                name: name || 'New Student', date: '', startHour: 13, endHour: 20, showWeekends: true, events: [],
+                status: 'active', versions: [], theme: 'none'
+            };
+            personalData.activeTab = newId; triggerSave(); renderTabs(); loadActiveStudentData();
+            closeAddStudentModal();
+        }
+        document.getElementById('newStudentNameInput').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') confirmAddStudent();
+        });
+
+        function deleteTab(id, event) {
+            event.stopPropagation();
+            let isOwnedShared = sharedMeta[id] && currentUser && sharedMeta[id].ownerId === currentUser.uid;
+            let isPurelyPersonal = appMode === 'personal' && !isOwnedShared;
+
+            let msg = isPurelyPersonal ? "Are you sure you want to delete this schedule permanently?"
+                : (isOwnedShared ? "This will delete the shared schedule for EVERYONE. Continue?" : "Remove this from your view?");
+
+            showDialog("Delete Schedule", msg, true, async (confirmed) => {
+                if(!confirmed) return;
+                if (isPurelyPersonal) {
+                    delete personalData.students[id];
+                    let pKeys = Object.keys(getMySchedules());
+                    personalData.activeTab = pKeys[0] || null;
+                    if(!personalData.activeTab) createInitialData();
+                    triggerSave();
+                    renderTabs(); loadActiveStudentData();
+                } else {
+                    if (isOwnedShared) {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sharedSchedules', id));
+                    } else {
+                        let newList = sharedMeta[id].sharedWithEmails.filter(e => e !== currentUser.email);
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sharedSchedules', id), {
+                            ownerId: sharedMeta[id].ownerId, ownerEmail: sharedMeta[id].ownerEmail,
+                            scheduleData: sharedStudents[id], sharedWithEmails: newList
+                        });
+                    }
+                }
+            });
+        }
+
+        function handleInputUpdate() {
+            const data = getActiveData();
+            if(!data) return;
+            data.name = document.getElementById('studentName').value;
+            data.date = document.getElementById('weekDate').value;
+            triggerSave(); renderTabs(); updateCanvasHeaders();
+        }
+
+        function handleTimeUpdate() {
+            const data = getActiveData();
+            if(!data) return;
+            let s = parseInt(document.getElementById('timeStart').value);
+            let e = parseInt(document.getElementById('timeEnd').value);
+            if(s >= e) {
+                showDialog("Invalid Time", "Start time must be before End time.", false);
+                document.getElementById('timeStart').value = data.startHour;
+                document.getElementById('timeEnd').value = data.endHour;
+                return;
+            }
+            data.startHour = s; data.endHour = e;
+            triggerSave(); drawEmptyGrid(); renderEvents();
+        }
+
+        function handleWeekendToggle() {
+            const data = getActiveData();
+            if(!data) return;
+            data.showWeekends = document.getElementById('toggleWeekends').checked;
+            triggerSave(); drawEmptyGrid(); renderEvents();
+        }
+
+        // Pick the first 'active'-status schedule in personal mode (or null)
+        function firstActivePersonalId() {
+            const mine = getMySchedules();
+            const keys = Object.keys(mine).filter(id => {
+                const s = mine[id];
+                return !s.status || s.status === 'active';
+            });
+            return keys.length ? keys[0] : null;
+        }
+
+        // If the active personal tab is no longer 'active' status, move off it.
+        function ensureActiveTabIsActive() {
+            if (appMode !== 'personal') return;
+            const cur = getMySchedules()[personalData.activeTab];
+            if (cur && cur.status && cur.status !== 'active') {
+                personalData.activeTab = firstActivePersonalId();
+            }
+        }
+
+        function updateArchiveCount() {
+            const btn = document.getElementById('btnOpenArchive');
+            if (!btn) return;
+            let n = 0;
+            const students = (personalData && personalData.students) ? personalData.students : {};
+            Object.keys(students).forEach(id => {
+                const st = students[id].status;
+                if (st === 'archived' || st === 'sent') n++;
+            });
+            btn.innerText = `Archive / Sent (${n})`;
+        }
+
+        function loadActiveStudentData() {
+            ensureActiveTabIsActive();
+            updateArchiveCount();
+            const data = getActiveData();
+            const ownerTag = document.getElementById('outOwner');
+            const emptyOverlay = document.getElementById('emptyOverlay');
+            const themeSel = document.getElementById('themeSelect');
+
+            if(!data) {
+                document.getElementById('studentName').value = '';
+                document.getElementById('studentName').disabled = true;
+                emptyOverlay.style.display = 'flex';
+                if (ownerTag) ownerTag.style.display = 'none';
+                grid.innerHTML = '';
+                document.getElementById('outName').innerText = 'Student Schedule';
+                document.getElementById('outDate').innerText = 'Week Commencing: ---';
+                if (themeSel) themeSel.value = 'none';
+                return;
+            }
+
+            document.getElementById('studentName').disabled = false;
+            emptyOverlay.style.display = 'none';
+
+            document.getElementById('studentName').value = data.name;
+            document.getElementById('weekDate').value = data.date;
+            document.getElementById('timeStart').value = data.startHour || 6;
+            document.getElementById('timeEnd').value = data.endHour || 20;
+            document.getElementById('toggleWeekends').checked = data.showWeekends !== false;
+            if (themeSel) themeSel.value = data.theme || 'none';
+
+            // Sharing UI removed (personal-only build): no owner tag to show.
+            if (ownerTag) ownerTag.style.display = 'none';
+
+            updateCanvasHeaders(); drawEmptyGrid(); renderEvents();
+        }
+
+        function drawEmptyGrid() {
+            grid.innerHTML = '';
+            const data = getActiveData();
+            if(!data) return;
+
+            let sHour = data.startHour || 6;
+            let eHour = data.endHour || 20;
+            let showWknd = data.showWeekends !== false;
+            let numDays = showWknd ? 7 : 5;
+
+            grid.style.gridTemplateColumns = `60px repeat(${numDays}, 1fr)`;
+
+            let emptyHeader = document.createElement('div');
+            emptyHeader.className = 'grid-header time-label corner-cell';
+            emptyHeader.style.gridColumn = 1; emptyHeader.style.gridRow = 1;
+            grid.appendChild(emptyHeader);
+
+            for (let i = 0; i < numDays; i++) {
+                let d = document.createElement('div'); d.className = 'grid-header';
+                d.innerText = days[i];
+                d.style.gridColumn = i + 2; d.style.gridRow = 1;
+                grid.appendChild(d);
+            }
+
+            for (let h = sHour; h <= eHour; h++) {
+                for (let m = 0; m < 60; m += 30) {
+                    if (h === eHour && m === 30) break;
+                    let rowOffset = (h - sHour) * 4 + (m / 15) + 2;
+
+                    let t = document.createElement('div'); t.className = 'grid-time time-label';
+                    t.innerText = `${h.toString().padStart(2, '0')}h${m === 0 ? '00' : '30'}`;
+                    t.style.gridColumn = 1; t.style.gridRow = `${rowOffset} / span 2`;
+                    grid.appendChild(t);
+
+                    for (let day = 0; day < numDays; day++) {
+                        let actualCol = day + 2;
+                        let cell = document.createElement('div'); cell.className = 'grid-cell';
+                        cell.style.gridColumn = actualCol; cell.style.gridRow = `${rowOffset} / span 2`;
+
+                        cell.dataset.day = actualCol; cell.dataset.h = h; cell.dataset.m = m;
+                        cell.onclick = () => openModalForAdd(actualCol, h, m);
+
+                        cell.ondragover = (e) => { e.preventDefault(); e.currentTarget.style.backgroundColor = '#e9eff5'; };
+                        cell.ondragleave = (e) => { e.currentTarget.style.backgroundColor = ''; };
+                        cell.ondrop = (e) => {
+                            e.preventDefault(); e.currentTarget.style.backgroundColor = '';
+                            if (draggedEventId) {
+                                const evTarget = getActiveData().events.find(x => x.id === draggedEventId);
+                                if (evTarget) {
+                                    evTarget.col = parseInt(e.currentTarget.dataset.day);
+                                    evTarget.startHourVal = parseInt(e.currentTarget.dataset.h);
+                                    evTarget.startMinVal = parseInt(e.currentTarget.dataset.m);
+                                    triggerSave(); renderEvents();
+                                }
+                            }
+                        };
+                        grid.appendChild(cell);
+                    }
+                }
+            }
+        }
+
+        function updateCanvasHeaders() {
+            const data = getActiveData();
+            if(!data) return;
+            document.getElementById('outName').innerText = data.name ? `${data.name}'s Schedule` : 'Student Schedule';
+            if(data.date) {
+                let formatted = new Date(data.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                document.getElementById('outDate').innerText = `Week Commencing: ${formatted}`;
+            } else {
+                document.getElementById('outDate').innerText = `Week Commencing: ---`;
+            }
+        }
+
+        // --- Event Editing Modals ---
+        const modal = document.getElementById('eventModal');
+
+        function parseTimeString(str) {
+            str = str.trim().toLowerCase();
+            let h, m;
+            let match = str.match(/^(\d{1,2})[h:.](\d{2})$/);
+            if (match) {
+                h = parseInt(match[1]); m = parseInt(match[2]);
+            } else if (/^\d{1,2}$/.test(str)) {
+                h = parseInt(str); m = 0;
+            } else if (/^\d{3,4}$/.test(str)) {
+                h = parseInt(str.slice(0, -2)); m = parseInt(str.slice(-2));
+            } else {
+                return null;
+            }
+            if (h < 0 || h > 23 || m < 0 || m > 59) return null;
+            return { h, m };
+        }
+
+        function selectColor(element) {
+            document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById('mColor').value = element.dataset.color;
+        }
+
+        function setColorInModal(colorClass) {
+            document.getElementById('mColor').value = colorClass;
+            document.querySelectorAll('.color-swatch').forEach(el => {
+                if(el.dataset.color === colorClass) { el.classList.add('active'); }
+                else { el.classList.remove('active'); }
+            });
+        }
+
+        function openModalForAdd(colIndex, h, m) {
+            editingEventId = null;
+            document.getElementById('modalTitle').innerText = 'Add Lesson';
+            document.getElementById('saveBtn').innerText = 'Add Lesson(s)';
+            document.getElementById('bulkDaysWrapper').style.display = 'block';
+            document.getElementById('singleDayWrapper').style.display = 'none';
+
+            for(let i=2; i<=8; i++) document.getElementById('chkDay'+i).checked = false;
+            document.getElementById('chkDay'+colIndex).checked = true;
+
+            let startStr = h.toString().padStart(2, '0') + 'h' + m.toString().padStart(2, '0');
+            let endH = Math.min(h + 1, 23);
+            let endStr = endH.toString().padStart(2, '0') + 'h' + m.toString().padStart(2, '0');
+
+            document.getElementById('mStartTime').value = '';
+            document.getElementById('mStartTime').placeholder = 'e.g. ' + startStr;
+            document.getElementById('mStartTime').dataset.default = startStr;
+
+            document.getElementById('mEndTime').value = '';
+            document.getElementById('mEndTime').placeholder = 'e.g. ' + endStr;
+            document.getElementById('mEndTime').dataset.default = endStr;
+
+            document.getElementById('mSubject').value = '';
+            document.getElementById('mTutor').value = '';
+            document.getElementById('mLocation').value = '';
+            setColorInModal('c-blue');
+            openOverlay(modal);
+        }
+
+        function openModalForEdit(eventId) {
+            const data = getActiveData();
+            const ev = data.events.find(x => x.id === eventId);
+            if(!ev) return;
+
+            editingEventId = eventId;
+            document.getElementById('modalTitle').innerText = 'Edit Lesson';
+            document.getElementById('saveBtn').innerText = 'Update Lesson(s)';
+
+            document.getElementById('bulkDaysWrapper').style.display = 'block';
+            document.getElementById('singleDayWrapper').style.display = 'none';
+
+            const groupIdToEdit = ev.groupId || ev.id;
+            const relatedEvents = data.events.filter(x => x.groupId === groupIdToEdit || (!x.groupId && x.id === eventId));
+
+            for(let i=2; i<=8; i++) document.getElementById('chkDay'+i).checked = false;
+            relatedEvents.forEach(relatedEv => {
+                let chk = document.getElementById('chkDay' + relatedEv.col);
+                if(chk) chk.checked = true;
+            });
+
+            let startStr = ev.startHourVal.toString().padStart(2, '0') + 'h' + ev.startMinVal.toString().padStart(2, '0');
+            let endH = ev.endHourVal !== undefined ? ev.endHourVal : Math.floor((ev.startHourVal * 60 + ev.startMinVal + ev.duration * 15) / 60);
+            let endM = ev.endMinVal !== undefined ? ev.endMinVal : (ev.startHourVal * 60 + ev.startMinVal + ev.duration * 15) % 60;
+            let endStr = endH.toString().padStart(2, '0') + 'h' + endM.toString().padStart(2, '0');
+
+            document.getElementById('mStartTime').value = startStr;
+            document.getElementById('mStartTime').placeholder = 'e.g. ' + startStr;
+            document.getElementById('mStartTime').dataset.default = startStr;
+
+            document.getElementById('mEndTime').value = endStr;
+            document.getElementById('mEndTime').placeholder = 'e.g. ' + endStr;
+            document.getElementById('mEndTime').dataset.default = endStr;
+
+            document.getElementById('mSubject').value = ev.subject;
+            document.getElementById('mTutor').value = ev.tutor || '';
+            document.getElementById('mLocation').value = ev.location || '';
+            setColorInModal(ev.colorClass || 'c-blue');
+
+            openOverlay(modal);
+        }
+
+        function closeModal() { closeOverlay(modal); }
+
+        function saveEvent() {
+            const data = getActiveData();
+            if(!data) return;
+
+            let startInput = document.getElementById('mStartTime').value.trim() || document.getElementById('mStartTime').dataset.default;
+            let endInput = document.getElementById('mEndTime').value.trim() || document.getElementById('mEndTime').dataset.default;
+
+            let parsedStart = parseTimeString(startInput);
+            let parsedEnd = parseTimeString(endInput);
+
+            if (!parsedStart || !parsedEnd) {
+                showDialog("Invalid Time format", "Please enter times in a format like 17h00 or 17:00", false);
+                return;
+            }
+
+            let h = parsedStart.h; let m = parsedStart.m;
+            let endH = parsedEnd.h; let endM = parsedEnd.m;
+            let totalStart = h * 60 + m; let totalEnd = endH * 60 + endM;
+
+            if (totalEnd <= totalStart) {
+                showDialog("Invalid Time", "Lesson End Time must be strictly after Start Time.", false);
+                return;
+            }
+
+            let durBlocks = Math.max(1, Math.round((totalEnd - totalStart) / 15));
+            let subj = document.getElementById('mSubject').value || 'Lesson';
+            let tut = document.getElementById('mTutor').value.trim();
+            let loc = document.getElementById('mLocation').value.trim();
+            let color = document.getElementById('mColor').value;
+
+            if (editingEventId) {
+                const evToEdit = data.events.find(x => x.id === editingEventId);
+                const groupIdToEdit = evToEdit.groupId || evToEdit.id;
+                justSavedGroupId = groupIdToEdit;
+                data.events = data.events.filter(x => x.groupId !== groupIdToEdit && x.id !== editingEventId);
+
+                for(let i=2; i<=8; i++) {
+                    let chk = document.getElementById('chkDay'+i);
+                    if(chk.checked) {
+                        data.events.push({
+                            id: 'evt_' + Date.now() + '_' + i + '_' + Math.floor(Math.random() * 1000),
+                            groupId: groupIdToEdit, subject: subj, tutor: tut, location: loc, duration: durBlocks,
+                            col: i, startHourVal: h, startMinVal: m, endHourVal: endH, endMinVal: endM, colorClass: color
+                        });
+                    }
+                }
+            } else {
+                let newGroupId = 'grp_' + Date.now();
+                justSavedGroupId = newGroupId;
+                for(let i=2; i<=8; i++) {
+                    let chk = document.getElementById('chkDay'+i);
+                    if(chk.checked) {
+                        data.events.push({
+                            id: 'evt_' + Date.now() + '_' + i + '_' + Math.floor(Math.random() * 1000),
+                            groupId: newGroupId, subject: subj, tutor: tut, location: loc, duration: durBlocks,
+                            col: i, startHourVal: h, startMinVal: m, endHourVal: endH, endMinVal: endM, colorClass: color
+                        });
+                    }
+                }
+            }
+            triggerSave(); renderEvents(); closeModal();
+        }
+
+        function deleteEvent(eventId) {
+            const data = getActiveData();
+            data.events = data.events.filter(e => e.id !== eventId);
+            triggerSave(); renderEvents();
+        }
+
+        function renderEvents() {
+            document.querySelectorAll('.event').forEach(e => e.remove());
+            const data = getActiveData();
+            if(!data) return;
+
+            let sHour = data.startHour || 6;
+            let showWknd = data.showWeekends !== false;
+
+            data.events.forEach(ev => {
+                if (!showWknd && ev.col > 6) return;
+
+                let endH = ev.endHourVal !== undefined ? ev.endHourVal : Math.floor(((ev.startHourVal * 60) + ev.startMinVal + (ev.duration * 15)) / 60);
+                let endM = ev.endMinVal !== undefined ? ev.endMinVal : ((ev.startHourVal * 60) + ev.startMinVal + (ev.duration * 15)) % 60;
+                let timeStr = `${String(ev.startHourVal).padStart(2,'0')}h${String(ev.startMinVal).padStart(2,'0')} - ${String(endH).padStart(2,'0')}h${String(endM).padStart(2,'0')}`;
+
+                let gridStartLine = Math.round((ev.startHourVal - sHour) * 4 + (ev.startMinVal / 15)) + 2;
+                let gridEndLine = Math.round((endH - sHour) * 4 + (endM / 15)) + 2;
+                let rowSpan = Math.max(1, gridEndLine - gridStartLine);
+
+                if(gridStartLine < 2) return;
+
+                let div = document.createElement('div');
+                div.className = `event ${ev.colorClass || 'c-blue'}`;
+                if(rowSpan === 1) div.classList.add('event-15min');
+                // Animate only the lesson that was just saved, not the whole week.
+                if (justSavedGroupId && ev.groupId === justSavedGroupId) div.classList.add('is-fresh');
+
+                div.style.gridColumn = ev.col;
+                div.style.gridRow = `${gridStartLine} / span ${rowSpan}`;
+
+                let contentHTML = `<span class="event-delete" onclick="deleteEvent('${ev.id}'); event.stopPropagation();">×</span>`;
+                let tutorHTML = ev.tutor ? `<span>${ev.tutor}</span>` : '';
+                let locHTML = ev.location ? `<span style="font-style: italic; opacity: 0.9;">${ev.location}</span>` : '';
+
+                if(rowSpan > 1) {
+                    contentHTML += `<strong>${ev.subject}</strong>${tutorHTML}${locHTML}<span class="event-time">${timeStr}</span>`;
+                } else {
+                    let tutorPipe = ev.tutor ? `<span>| ${ev.tutor}</span>` : '';
+                    let locPipe = ev.location ? `<span style="font-style: italic;">| ${ev.location}</span>` : '';
+                    contentHTML += `<div class="event-content-wrapper"><strong>${ev.subject}</strong>${tutorPipe}${locPipe}<span>| ${timeStr}</span></div>`;
+                }
+                div.innerHTML = contentHTML;
+
+                div.onclick = (e) => { e.stopPropagation(); openModalForEdit(ev.id); };
+                div.draggable = true;
+                div.ondragstart = (e) => {
+                    draggedEventId = ev.id; e.dataTransfer.effectAllowed = 'move';
+                    setTimeout(() => { div.style.opacity = '0.5'; }, 0);
+                };
+                div.ondragend = (e) => {
+                    draggedEventId = null; div.style.opacity = '1'; renderEvents();
+                };
+
+                grid.appendChild(div);
+            });
+
+            // One render only — a later re-render of the same events shouldn't
+            // replay the entrance.
+            justSavedGroupId = null;
+        }
+
+        function clearCurrentSchedule() {
+            showDialog("Clear Schedule", "Are you sure you want to clear all lessons for THIS student?", true, (confirmed) => {
+                if (confirmed) {
+                    const data = getActiveData();
+                    if(data) { data.events = []; triggerSave(); renderEvents(); }
+                }
+            });
+        }
+
+        // ================================================
+        // ===== EXPORT DELIVERY                       =====
+        // ================================================
+        // Every browser on iOS is Safari underneath (Apple requires WebKit),
+        // so "it fails in Chrome too" is one engine failing twice. Three
+        // things broke the old download there:
+        //   1. link.click() fired ~2s after the tap, by which point iOS had
+        //      revoked the user gesture and silently dropped the download.
+        //   2. canvas.toDataURL() produced a multi-megabyte data: URI, past
+        //      what WebKit will navigate to.
+        //   3. the anchor was never in the DOM.
+        // toBlob + an in-DOM anchor fixes 2 and 3. Nothing fixes 1 from a
+        // callback, so on iOS we present the image and let a real tap save it.
+        const isIOS = () =>
+            /iP(hone|ad|od)/.test(navigator.platform) ||
+            (navigator.userAgent.includes('Mac') && 'ontouchend' in document) ||
+            /iPhone|iPad|iPod/.test(navigator.userAgent);
+
+        function setExportBusy(busy) {
+            const btn = document.getElementById('exportBtn');
+            if (btn) btn.dataset.busy = busy ? 'true' : 'false';
+        }
+
+        function deliverExport(canvas, filename) {
+            const finish = () => setExportBusy(false);
+
+            if (!canvas.toBlob) { finish(); return legacyDownload(canvas, filename); }
+
+            canvas.toBlob(blob => {
+                if (!blob) { finish(); return legacyDownload(canvas, filename); }
+
+                // iOS: no silent save is possible this late, so show the image.
+                if (isIOS()) { finish(); return openSaveSheet(blob, filename); }
+
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);   // Safari ignores detached anchors
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 10000);
+                finish();
+                showToast('Schedule exported ✓');
+            }, 'image/png');
+        }
+
+        function legacyDownload(canvas, filename) {
+            try {
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL('image/png');
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                showToast('Schedule exported ✓');
+            } catch (e) {
+                console.error(e);
+                showDialog("Export Failed", "Could not save the image. Please try again.", false);
+            }
+            setExportBusy(false);
+        }
+
+        // The sheet exists so the save happens inside a fresh tap. Share puts
+        // it straight into WhatsApp or Photos; long-pressing the image works
+        // as a fallback on older iOS.
+        function openSaveSheet(blob, filename) {
+            let sheet = document.getElementById('saveSheet');
+            const url = URL.createObjectURL(blob);
+
+            if (!sheet) {
+                sheet = document.createElement('div');
+                sheet.className = 'modal-overlay';
+                sheet.id = 'saveSheet';
+                sheet.setAttribute('data-html2canvas-ignore', 'true');
+                sheet.innerHTML = `
+                    <div class="modal">
+                        <h3 style="margin-bottom:0;">Schedule ready</h3>
+                        <img id="saveSheetImg" alt="Schedule preview">
+                        <p class="save-hint" id="saveSheetHint"></p>
+                        <div class="save-actions">
+                            <button style="background:#ccc; color:#333;" id="saveSheetClose">Close</button>
+                            <button class="btn-primary" id="saveSheetShare">Save image</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(sheet);
+                sheet.addEventListener('click', e => {
+                    if (e.target === sheet) closeSaveSheet();
+                });
+                document.getElementById('saveSheetClose').onclick = closeSaveSheet;
+            }
+
+            const img = document.getElementById('saveSheetImg');
+            if (img.dataset.url) URL.revokeObjectURL(img.dataset.url);
+            img.src = url;
+            img.dataset.url = url;
+
+            const file = new File([blob], filename, { type: 'image/png' });
+            const canShareFile = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+
+            document.getElementById('saveSheetHint').textContent = canShareFile
+                ? 'Tap Save image to send it on or add it to Photos. You can also press and hold the preview.'
+                : 'Press and hold the preview, then choose "Save to Photos" or "Add to Files".';
+
+            const shareBtn = document.getElementById('saveSheetShare');
+            shareBtn.style.display = canShareFile ? '' : 'none';
+            shareBtn.onclick = () => {
+                // Runs inside this tap, so the gesture is still valid.
+                navigator.share({ files: [file], title: filename })
+                    .then(() => { closeSaveSheet(); showToast('Schedule saved ✓'); })
+                    .catch(err => { if (err && err.name !== 'AbortError') console.error(err); });
+            };
+
+            openOverlay(sheet);
+        }
+
+        function closeSaveSheet() {
+            const sheet = document.getElementById('saveSheet');
+            if (!sheet) return;
+            closeOverlay(sheet);
+            const img = document.getElementById('saveSheetImg');
+            setTimeout(() => {
+                if (img && img.dataset.url) {
+                    URL.revokeObjectURL(img.dataset.url);
+                    delete img.dataset.url;
+                    img.removeAttribute('src');
+                }
+            }, 400);
+        }
+
+        function exportSchedule() {
+            setExportBusy(true);
+            // If a theme preview flash is mid-flight, settle the card first
+            // so the dark-card save/restore below sees the true screen state.
+            cancelThemePreview();
+
+            const captureArea = document.getElementById('capture-area');
+            const gridScroll = document.querySelector('.grid-scroll');
+            const gridEl = document.getElementById('scheduleGrid');
+            let deleteBtns = document.querySelectorAll('.event-delete');
+            deleteBtns.forEach(btn => btn.style.display = 'none');
+
+            // SCREEN vs DOWNLOAD: the card is dark on screen (.dark-card) but
+            // exports on WHITE (or themed). Remove dark-card before capture.
+            const hadDarkCard = captureArea.classList.contains('dark-card');
+            if (hadDarkCard) captureArea.classList.remove('dark-card');
+
+            // GIRLY POP: exports always use the normal on-brand look, never pink.
+            const hadGirly = document.body.classList.contains('girly-pop');
+            if (hadGirly) document.body.classList.remove('girly-pop');
+
+            // ===== MOBILE EXPORT FIX =====
+            // On a phone the card is only as wide as the screen and the grid
+            // scrolls horizontally, so a naive capture grabs just the visible
+            // slice of the week (or a squashed grid). Force the card to its
+            // full desktop width, disable the inner scroll, and render the
+            // clone in a desktop-sized virtual window so the @media mobile
+            // rules (sticky time column, min-width, etc.) don't apply.
+            const EXPORT_WIDTH = 900; // matches .schedule-wrapper desktop max-width
+            const prevCardWidth = captureArea.style.width;
+            const prevCardMaxWidth = captureArea.style.maxWidth;
+            captureArea.style.width = EXPORT_WIDTH + 'px';
+            captureArea.style.maxWidth = EXPORT_WIDTH + 'px';
+
+            let prevOverflow = '', prevMinWidth = '';
+            if (gridScroll) {
+                prevOverflow = gridScroll.style.overflowX;
+                gridScroll.style.overflowX = 'visible';
+            }
+            if (gridEl) {
+                prevMinWidth = gridEl.style.minWidth;
+                gridEl.style.minWidth = '0px';
+            }
+
+            // Scroll to top-left so html2canvas measures element bounds correctly.
+            const prevScrollX = window.scrollX, prevScrollY = window.scrollY;
+            window.scrollTo(0, 0);
+
+            // THEME: apply the active student's download theme (skip 'none').
+            const data = getActiveData();
+            const themeVal = (data && data.theme) ? data.theme : 'none';
+            let appliedThemeClass = null;
+            if (themeVal && themeVal !== 'none') {
+                appliedThemeClass = 'theme-' + themeVal;
+                captureArea.classList.add(appliedThemeClass);
+            }
+
+            const cleanup = () => {
+                deleteBtns.forEach(btn => btn.style.display = '');
+                captureArea.style.width = prevCardWidth;
+                captureArea.style.maxWidth = prevCardMaxWidth;
+                if (gridScroll) gridScroll.style.overflowX = prevOverflow;
+                if (gridEl) gridEl.style.minWidth = prevMinWidth;
+                if (appliedThemeClass) captureArea.classList.remove(appliedThemeClass);
+                // Return the on-screen card to its dark look.
+                if (hadDarkCard) captureArea.classList.add('dark-card');
+                // Restore Natasha's pink theme on screen after export.
+                if (hadGirly) document.body.classList.add('girly-pop');
+                window.scrollTo(prevScrollX, prevScrollY);
+            };
+
+            // Let the browser re-layout at the forced width before measuring.
+            nextFrame(() => {
+                const fullWidth = captureArea.scrollWidth;
+                const fullHeight = captureArea.scrollHeight;
+
+                // WebKit refuses to allocate a canvas past ~16.7M pixels and
+                // hands back a blank one instead of throwing. A tall schedule
+                // at scale 2 can cross that, so drop the scale to fit rather
+                // than exporting an empty image.
+                const MAX_CANVAS_PX = 16777216 * 0.85;
+                let exportScale = 2;
+                if (fullWidth * fullHeight * exportScale * exportScale > MAX_CANVAS_PX) {
+                    exportScale = Math.max(1, Math.sqrt(MAX_CANVAS_PX / (fullWidth * fullHeight)));
+                }
+
+                html2canvas(captureArea, {
+                    scale: exportScale,
+                    useCORS: true,
+                    width: fullWidth,
+                    height: fullHeight,
+                    // Desktop-sized virtual window: keeps mobile @media rules
+                    // OFF in html2canvas's internal clone of the page.
+                    windowWidth: Math.max(fullWidth + 100, 1100),
+                    windowHeight: fullHeight + 100,
+                    scrollX: 0,
+                    scrollY: 0
+                }).then(canvas => {
+                    let name = (data && data.name) ? data.name : 'Student';
+                    let filename = `Genius_Schedule_${name.replace(/\s+/g, '_')}.png`;
+                    cleanup();
+                    deliverExport(canvas, filename);
+                }).catch(err => {
+                    console.error(err);
+                    cleanup();
+                    setExportBusy(false);
+                    showDialog("Export Failed", "Could not generate the image. Please try again.", false);
+                });
+            });
+        }
+
+        // ================================================
+        // ===== TOAST + UNDO                          =====
+        // ================================================
+        let _toastTimer = null;
+        function showToast(message, undoCallback) {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toastMsg');
+            const undoBtn = document.getElementById('toastUndo');
+            if (!toast) return;
+
+            msg.innerText = message;
+
+            // Reset the undo handler each time
+            const freshBtn = undoBtn.cloneNode(true);
+            undoBtn.replaceWith(freshBtn);
+
+            if (typeof undoCallback === 'function') {
+                freshBtn.classList.remove('is-hidden');
+                freshBtn.onclick = () => {
+                    if (_toastTimer) clearTimeout(_toastTimer);
+                    toast.classList.remove('is-visible');
+                    undoCallback();
+                };
+            } else {
+                freshBtn.classList.add('is-hidden');
+            }
+
+            toast.classList.add('is-visible');
+            if (_toastTimer) clearTimeout(_toastTimer);
+            _toastTimer = setTimeout(() => { toast.classList.remove('is-visible'); }, TOAST_LIFE_MS);
+
+            startToastRail(typeof undoCallback === 'function');
+        }
+
+        const TOAST_LIFE_MS = 6000;
+
+        // Drains a gold rail across the bottom of the toast over its lifetime,
+        // so how long Undo stays available is visible rather than guessed.
+        // Only shown when there's actually something to undo.
+        function startToastRail(hasUndo) {
+            const rail = document.getElementById('toastRail');
+            if (!rail) return;
+
+            rail.classList.remove('is-running', 'is-armed');
+            if (!hasUndo || prefersReducedMotion()) { rail.style.opacity = '0'; return; }
+
+            rail.style.removeProperty('opacity');
+            rail.style.setProperty('--toast-life', TOAST_LIFE_MS + 'ms');
+            rail.classList.add('is-armed');      // full width, no transition
+            void rail.offsetWidth;               // commit before it starts draining
+            rail.classList.remove('is-armed');
+            rail.classList.add('is-running');
+        }
+
+        // ================================================
+        // ===== ARCHIVE / SENT (reversible)           =====
+        // ================================================
+        function setStatusForCurrent(newStatus, toastMsg) {
+            if (appMode !== 'personal') {
+                showDialog("Personal only", "Archiving and 'sent' status apply to your personal schedules only.", false);
+                return;
+            }
+            const id = personalData.activeTab;
+            const student = personalData.students[id];
+            if (!student) return;
+
+            const prevStatus = student.status || 'active';
+            student.status = newStatus;
+            triggerSave();
+            // Move off this tab since it's no longer active
+            personalData.activeTab = firstActivePersonalId();
+            if (!personalData.activeTab) {
+                // none active left - keep students but show empty state cleanly
+            }
+            renderTabs();
+            loadActiveStudentData();
+
+            showToast(toastMsg, () => {
+                if (personalData.students[id]) {
+                    personalData.students[id].status = prevStatus;
+                    personalData.activeTab = id;
+                    triggerSave();
+                    renderTabs();
+                    loadActiveStudentData();
+                }
+            });
+        }
+
+        function archiveCurrent() {
+            setStatusForCurrent('archived', 'Schedule archived');
+        }
+
+        function markSentThisWeek() {
+            setStatusForCurrent('sent', 'Marked as sent this week');
+        }
+
+        function openArchiveModal() {
+            renderArchiveModal();
+            openOverlay('archiveModal');
+        }
+        function closeArchiveModal() {
+            closeOverlay('archiveModal');
+        }
+
+        function escapeHtml(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function renderArchiveModal() {
+            const students = (personalData && personalData.students) ? personalData.students : {};
+            const archivedBox = document.getElementById('archiveListArchived');
+            const sentBox = document.getElementById('archiveListSent');
+            archivedBox.innerHTML = '';
+            sentBox.innerHTML = '';
+
+            let archivedCount = 0, sentCount = 0;
+            Object.keys(students).forEach(id => {
+                const s = students[id];
+                if (s.status !== 'archived' && s.status !== 'sent') return;
+                const row = `
+                    <div class="archive-item">
+                        <span>${escapeHtml(s.name || 'Unnamed')}</span>
+                        <span class="item-actions">
+                            <button class="item-reopen" onclick="reopenSchedule('${id}')">Reopen</button>
+                            <button class="item-delete" onclick="deleteArchivedSchedule('${id}')">Delete</button>
+                        </span>
+                    </div>`;
+                if (s.status === 'archived') { archivedBox.innerHTML += row; archivedCount++; }
+                else { sentBox.innerHTML += row; sentCount++; }
+            });
+
+            if (!archivedCount) archivedBox.innerHTML = '<div class="archive-empty">No archived schedules.</div>';
+            if (!sentCount) sentBox.innerHTML = '<div class="archive-empty">Nothing marked as sent.</div>';
+        }
+
+        function reopenSchedule(id) {
+            const s = personalData.students[id];
+            if (!s) return;
+            s.status = 'active';
+            appMode = 'personal';
+            personalData.activeTab = id;
+            triggerSave();
+            renderTabs();
+            loadActiveStudentData();
+            renderArchiveModal();
+        }
+
+        function deleteArchivedSchedule(id) {
+            const s = personalData.students[id];
+            if (!s) return;
+            showDialog("Delete Schedule", `Permanently delete "${s.name || 'Unnamed'}"? This cannot be undone.`, true, (confirmed) => {
+                if (!confirmed) return;
+                delete personalData.students[id];
+                if (personalData.activeTab === id) personalData.activeTab = firstActivePersonalId();
+                triggerSave();
+                renderTabs();
+                loadActiveStudentData();
+                renderArchiveModal();
+            });
+        }
+
+        // ================================================
+        // ===== VERSIONS (per schedule)               =====
+        // ================================================
+        function deepCopyEvents(events) {
+            return (events || []).map(e => Object.assign({}, e));
+        }
+
+        function makeSnapshot(student) {
+            return {
+                name: student.name,
+                date: student.date,
+                startHour: student.startHour,
+                endHour: student.endHour,
+                showWeekends: student.showWeekends,
+                events: deepCopyEvents(student.events)
+            };
+        }
+
+        function formatTimestamp(ts) {
+            try {
+                return new Date(ts).toLocaleString('en-GB', {
+                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+            } catch (e) { return String(ts); }
+        }
+
+        function openVersionsModal() {
+            const data = getActiveData();
+            if (!data) {
+                showDialog("No schedule", "Select a schedule first to manage its versions.", false);
+                return;
+            }
+            document.getElementById('versionLabelInput').value = '';
+            renderVersionsList();
+            openOverlay('versionsModal');
+        }
+        function closeVersionsModal() {
+            closeOverlay('versionsModal');
+        }
+
+        function renderVersionsList() {
+            const data = getActiveData();
+            const box = document.getElementById('versionsList');
+            box.innerHTML = '';
+            if (!data) { box.innerHTML = '<div class="archive-empty">No schedule selected.</div>'; return; }
+            if (!Array.isArray(data.versions)) data.versions = [];
+
+            if (data.versions.length === 0) {
+                box.innerHTML = '<div class="archive-empty">No versions saved yet.</div>';
+                return;
+            }
+            // newest first
+            const sorted = data.versions.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            sorted.forEach(v => {
+                box.innerHTML += `
+                    <div class="version-item">
+                        <span class="ver-meta">
+                            <span class="ver-label">${escapeHtml(v.label || 'Version')}</span>
+                            <span class="ver-time">${escapeHtml(formatTimestamp(v.createdAt))}</span>
+                        </span>
+                        <span class="item-actions">
+                            <button class="item-restore" onclick="restoreVersion('${v.id}')">Restore</button>
+                            <button class="item-delete" onclick="deleteVersion('${v.id}')">Delete</button>
+                        </span>
+                    </div>`;
+            });
+        }
+
+        function saveCurrentAsVersion() {
+            const data = getActiveData();
+            if (!data) return;
+            if (!Array.isArray(data.versions)) data.versions = [];
+            const customLabel = document.getElementById('versionLabelInput').value.trim();
+            const now = Date.now();
+            data.versions.push({
+                id: 'ver_' + now,
+                label: customLabel || formatTimestamp(now),
+                createdAt: now,
+                snapshot: makeSnapshot(data)
+            });
+            document.getElementById('versionLabelInput').value = '';
+            triggerSave();
+            renderVersionsList();
+            showToast('Version saved');
+        }
+
+        function restoreVersion(versionId) {
+            const data = getActiveData();
+            if (!data || !Array.isArray(data.versions)) return;
+            const v = data.versions.find(x => x.id === versionId);
+            if (!v) return;
+
+            showDialog("Restore Version", `Restore "${v.label}"? Your current state will be auto-saved as a version first.`, true, (confirmed) => {
+                if (!confirmed) return;
+                const now = Date.now();
+                // 1) Auto-snapshot current state
+                data.versions.push({
+                    id: 'ver_' + now,
+                    label: 'Auto-saved before restore',
+                    createdAt: now,
+                    snapshot: makeSnapshot(data)
+                });
+                // 2) Copy chosen snapshot back (deep-copy events with fresh ids)
+                const snap = v.snapshot || {};
+                data.name = snap.name;
+                data.date = snap.date;
+                data.startHour = snap.startHour;
+                data.endHour = snap.endHour;
+                data.showWeekends = snap.showWeekends;
+                data.events = (snap.events || []).map(e => {
+                    const copy = Object.assign({}, e);
+                    copy.id = 'evt_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+                    return copy;
+                });
+                triggerSave();
+                loadActiveStudentData();
+                renderVersionsList();
+                showToast('Version restored');
+            });
+        }
+
+        function deleteVersion(versionId) {
+            const data = getActiveData();
+            if (!data || !Array.isArray(data.versions)) return;
+            data.versions = data.versions.filter(v => v.id !== versionId);
+            triggerSave();
+            renderVersionsList();
+        }
+
+        // ================================================
+        // ===== "MORE" DROPDOWN MENU                  =====
+        // ================================================
+        function toggleMoreMenu(event) {
+            if (event) event.stopPropagation();
+            document.getElementById('moreMenu').classList.toggle('open');
+        }
+        function closeMoreMenu() {
+            document.getElementById('moreMenu').classList.remove('open');
+        }
+        document.addEventListener('click', (e) => {
+            const wrap = document.querySelector('.more-wrap');
+            if (wrap && !wrap.contains(e.target)) closeMoreMenu();
+        });
+
+        // ================================================
+        // ===== THEMES (download-applied)             =====
+        // ================================================
+        let _themePreviewTimer = null;
+
+        // Remove any in-progress preview and return the card to its dark look.
+        function cancelThemePreview() {
+            if (_themePreviewTimer) { clearTimeout(_themePreviewTimer); _themePreviewTimer = null; }
+            const card = document.getElementById('capture-area');
+            card.classList.remove('theme-storybook', 'theme-space', 'theme-jungle');
+            if (!card.classList.contains('dark-card')) card.classList.add('dark-card');
+        }
+
+        // Flash the chosen theme on the schedule card for a moment so the
+        // user can see what the download will look like.
+        function previewTheme(themeVal) {
+            cancelThemePreview();
+            if (!themeVal || themeVal === 'none') return;
+            const card = document.getElementById('capture-area');
+            card.classList.remove('dark-card');
+            card.classList.add('theme-' + themeVal);
+            _themePreviewTimer = setTimeout(cancelThemePreview, 1800);
+        }
+
+        function setTheme(value) {
+            const data = getActiveData();
+            if (!data) return;
+            data.theme = value || 'none';
+            triggerSave();
+            previewTheme(data.theme);
+        }
+    </script>
+</body>
+</html>
