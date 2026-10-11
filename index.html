@@ -1457,6 +1457,86 @@
         body.girly-pop .more-menu button:hover { background: rgba(230,0,115,0.08); color: #e60073; }
         body.girly-pop .more-menu .menu-divider { background: #ffd1ec; }
 
+
+        /* ============================================== */
+        /* ===== MATRIC EXAM OVERLAY (ghost blocks)  ===== */
+        /* ============================================== */
+        .exam-ghost {
+            margin: 2px; border-radius: 4px; padding: 5px 6px; font-size: 0.68rem; line-height: 1.25;
+            position: relative; z-index: 5; overflow: hidden; pointer-events: none;
+            display: flex; flex-direction: column; gap: 1px; text-align: left;
+            color: #3b4a5a;
+            border: 1.5px dashed #8a97a6;
+            background: repeating-linear-gradient(135deg, rgba(26,42,58,0.11) 0 6px, rgba(26,42,58,0.03) 6px 12px);
+        }
+        .exam-ghost .exam-tag { font-size: 0.58rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #5d6b7a; }
+        .exam-ghost strong { font-size: 0.72rem; font-weight: 700; display: block; }
+        .exam-ghost .exam-sub { display: block; font-weight: 600; opacity: 0.9; }
+        .exam-ghost .exam-more { font-style: italic; opacity: 0.8; }
+        .exam-ghost .exam-time { margin-top: auto; font-weight: 600; font-size: 0.64rem; opacity: 0.9; padding-top: 2px; }
+        .exam-ghost.exam-clipped { border-top-style: dotted; }
+        .exam-ghost.exam-short { flex-direction: row; align-items: center; gap: 6px; white-space: nowrap; padding: 2px 6px; }
+        .exam-ghost.exam-short strong, .exam-ghost.exam-short .exam-sub { display: inline; }
+        .exam-ghost.exam-short .exam-time { margin-top: 0; padding-top: 0; }
+        #capture-area.dark-card .exam-ghost {
+            color: #e3e7ee; border-color: rgba(255,255,255,0.40);
+            background: repeating-linear-gradient(135deg, rgba(255,255,255,0.10) 0 6px, rgba(255,255,255,0.03) 6px 12px);
+        }
+        #capture-area.dark-card .exam-ghost .exam-tag { color: var(--accent-gold); }
+
+        /* A lesson that overlaps an exam session */
+        .event.event-clash { box-shadow: 0 0 0 2px #ff5252, 0 2px 4px rgba(0,0,0,0.1); }
+        .clash-badge {
+            position: absolute; bottom: 3px; right: 4px; background: #ff5252; color: #fff;
+            font-size: 0.56rem; font-weight: 800; padding: 1px 5px; border-radius: 10px; letter-spacing: 0.03em;
+            line-height: 1.4;
+        }
+        .event-15min .clash-badge { bottom: 1px; }
+
+        /* Export without exam times: hide ghosts + note, drop clash rings */
+        #capture-area.hide-exams .exam-ghost,
+        #capture-area.hide-exams #outExamNote { display: none !important; }
+        #capture-area.hide-exams .event.event-clash { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        #outExamNote { margin: 3px 0 0; font-size: 0.72rem; font-weight: 600; color: #6b7785; display: none; }
+        #capture-area.dark-card #outExamNote { color: var(--accent-gold); }
+
+        /* Controls */
+        .matric-wrap { display: flex; align-items: center; gap: 10px; height: 40px; }
+        #btnMatricSetup { padding: 8px 12px; font-size: 0.8rem; white-space: nowrap; }
+        .clash-chip {
+            display: inline-block; background: #ff5252; color: #fff; font-size: 0.62rem; font-weight: 800;
+            padding: 1px 7px; border-radius: 10px; margin-left: 6px; vertical-align: middle;
+        }
+
+        /* Matric modal */
+        .seg { display: flex; margin-bottom: 15px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); }
+        .seg button { flex: 1; border-radius: 0; background: #1b2029; color: #b8bcc4; padding: 9px 10px; font-size: 0.85rem; }
+        .seg button.active { background: var(--accent-gold); color: #14181f; }
+        .subject-search { width: 100%; margin-bottom: 8px; }
+        .subject-list {
+            max-height: 220px; overflow-y: auto; background: #1b2029; border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px; padding: 8px; margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start;
+        }
+        .subject-list label {
+            background: #232a35; color: #d5d9e0; border: 1px solid rgba(255,255,255,0.10); padding: 5px 10px;
+            border-radius: 14px; font-size: 0.75rem; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;
+            margin: 0; user-select: none;
+        }
+        .subject-list input { display: none; }
+        .subject-list label.on { background: var(--accent-gold); color: #14181f; border-color: var(--accent-gold); font-weight: 700; }
+        .subject-list .subj-group { flex-basis: 100%; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: #8a909b; margin: 8px 0 0; font-weight: 700; }
+        .subject-list .subj-group:first-child { margin-top: 0; }
+        .subject-list .subj-empty { color: #8a909b; font-size: 0.8rem; padding: 6px; }
+        .matric-hint { font-size: 0.75rem; color: #8a909b; margin: 0 0 12px; line-height: 1.4; }
+        .matric-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 4px 0 12px; }
+        .matric-row label { margin: 0; }
+        .matric-row select { margin: 0; width: auto; }
+        body.girly-pop .subject-list { background: #fff0f8; border-color: #ffb3de; }
+        body.girly-pop .subject-list label { background: #ffe0f3; color: #b3046a; border-color: #ffb3de; }
+        body.girly-pop .subject-list label.on { background: #e60073; color: #fff; border-color: #e60073; }
+        body.girly-pop .seg button { background: #ffe0f3; color: #b3046a; }
+        body.girly-pop .seg button.active { background: #e60073; color: #fff; }
     </style>
 </head>
 <body class="intro-running">
@@ -1682,6 +1762,19 @@
             </div>
         </div>
 
+        <div class="control-pair">
+            <div class="input-group">
+                <label>Matric Student</label>
+                <div class="matric-wrap">
+                    <label class="switch" title="Overlay the Grade 12 final exam timetable on this week">
+                        <input type="checkbox" id="toggleMatric" onchange="handleMatricToggle()">
+                        <span class="slider"></span>
+                    </label>
+                    <button id="btnMatricSetup" class="btn-secondary" onclick="openMatricModal()" style="display:none;">🎓 Exam subjects</button>
+                </div>
+            </div>
+        </div>
+
         <div class="btn-group">
             <div class="more-wrap">
                 <button id="btnMore" class="btn-secondary" onclick="toggleMoreMenu(event)">⋯ More</button>
@@ -1719,6 +1812,7 @@
                 <div class="schedule-info">
                     <h1 id="outName">Student Schedule</h1>
                     <p id="outDate">Week Commencing: ---</p>
+                    <p id="outExamNote"></p>
                     <p id="outOwner" data-html2canvas-ignore="true" style="display:none; color: var(--accent-gold); font-size: 0.8rem; margin-top: 3px;">Owner: ...</p>
                 </div>
             </div>
@@ -1867,6 +1961,55 @@
         </div>
     </div>
 
+    <!-- Matric Exam Overlay Modal -->
+    <div class="modal-overlay" id="matricModal" data-html2canvas-ignore="true">
+        <div class="modal">
+            <h3>🎓 Matric Exam Timetable</h3>
+            <p class="matric-hint">Final exam sessions appear as ghost blocks on the week so lessons don't clash. Pick this student's subjects to keep the week uncluttered — with none picked, every paper on the timetable is shown.</p>
+
+            <label>Exam Board</label>
+            <div class="seg" id="matricBoardSeg">
+                <button type="button" data-board="ieb" onclick="setMatricBoard('ieb')">IEB</button>
+                <button type="button" data-board="nsc" onclick="setMatricBoard('nsc')">NSC (DBE / CAPS)</button>
+            </div>
+
+            <label>Subjects <span id="matricSubjCount" style="font-weight:400; opacity:0.8;"></span></label>
+            <input type="text" id="matricSubjectSearch" class="subject-search" placeholder="Search subjects…" oninput="renderMatricSubjectList()">
+            <div class="subject-list" id="matricSubjectList"></div>
+            <div style="display:flex; gap:8px; margin-bottom:10px;">
+                <button type="button" class="btn-ghost" style="padding:6px 10px; font-size:0.75rem;" onclick="clearMatricSubjects()">Clear selection (show all)</button>
+            </div>
+
+            <div class="matric-row">
+                <label for="matricExportMode">Exam times in downloads</label>
+                <select id="matricExportMode" onchange="setMatricExportMode(this.value)">
+                    <option value="ask">Ask me each time</option>
+                    <option value="with">Always include</option>
+                    <option value="without">Never include</option>
+                </select>
+            </div>
+
+            <p class="matric-hint" id="matricSourceNote"></p>
+
+            <div class="btn-group" style="justify-content: flex-end; width: 100%;">
+                <button style="background:#ccc; color:#333;" onclick="closeMatricModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export choice: with / without exam times -->
+    <div class="modal-overlay" id="exportChoiceModal" data-html2canvas-ignore="true" style="z-index: 2000;">
+        <div class="modal" style="text-align:center;">
+            <h3>Save / Export</h3>
+            <p style="margin-bottom: 20px; color: #b8bcc4;">This week has matric exam sessions. Include the exam times in the image?</p>
+            <div class="btn-group" style="justify-content: center; flex-wrap: wrap;">
+                <button style="background:#ccc; color:#333;" onclick="resolveExportChoice(null)">Cancel</button>
+                <button class="btn-secondary" onclick="resolveExportChoice(false)">Without exam times</button>
+                <button class="btn-primary" onclick="resolveExportChoice(true)">With exam times</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast (with optional Undo) -->
     <div id="toast" data-html2canvas-ignore="true">
         <span id="toastMsg"></span>
@@ -1985,6 +2128,15 @@
         window.confirmAddStudent = confirmAddStudent;
         window.toggleMoreMenu = toggleMoreMenu;
         window.closeMoreMenu = closeMoreMenu;
+        window.handleMatricToggle = handleMatricToggle;
+        window.openMatricModal = openMatricModal;
+        window.closeMatricModal = closeMatricModal;
+        window.setMatricBoard = setMatricBoard;
+        window.renderMatricSubjectList = renderMatricSubjectList;
+        window.toggleMatricSubject = toggleMatricSubject;
+        window.clearMatricSubjects = clearMatricSubjects;
+        window.setMatricExportMode = setMatricExportMode;
+        window.resolveExportChoice = resolveExportChoice;
 
         // Data Helpers
         function getMySchedules() {
@@ -2035,6 +2187,7 @@
                 if (typeof s.status === 'undefined' || s.status === null) s.status = 'active';
                 if (!Array.isArray(s.versions)) s.versions = [];
                 if (typeof s.theme === 'undefined' || s.theme === null) s.theme = 'none';
+                getMatric(s); // normalise matric overlay settings
             });
             return dataObj;
         }
@@ -2233,6 +2386,456 @@
             personalData.activeTab = initialId;
         }
 
+
+        // ================================================
+        // ===== MATRIC EXAM TIMETABLE OVERLAY         =====
+        // ================================================
+        // Sources (final timetables, 2026):
+        //   IEB : "2026 National Senior Certificate Examinations Final Timetable",
+        //         Attachment to NSC Circular 38 of 2026.
+        //   NSC : DBE "October/November 2026 NSC Examinations Timetable" (Feb 2026).
+        // Session = [date, start, end, subject | [subjects], paper]. Subjects that
+        // share one session are listed together; durations are converted to end times.
+        const MATRIC_TIMETABLES = {
+            ieb: {
+                label: 'IEB',
+                source: 'IEB 2026 NSC Final Timetable (Attachment to NSC Circular 38 of 2026)',
+                sessions: [
+                    ['2026-09-15','09:00','11:00','Life Orientation','CAT Part B'],
+                    ['2026-09-16','10:00','11:30','Life Sciences','PAT'],
+                    // Week 1
+                    ['2026-10-13','09:00','11:00','Further Studies Chemistry','PI'],
+                    ['2026-10-13','14:00','16:00',['German HL','German SAL','Gujarati HL','Gujarati FAL','Gujarati SAL','Hebrew SAL','Hindi HL','Hindi FAL','Hindi SAL','Tamil HL','Tamil FAL','Tamil SAL','Telugu HL','Telugu FAL','Telugu SAL','Urdu HL','Urdu FAL','Urdu SAL'],'PI'],
+                    ['2026-10-14','09:00','10:00','Further Studies Chemistry','PII'],
+                    ['2026-10-14','14:00','16:00',['Arabic SAL','French SAL','Italian SAL','Mandarin SAL','Modern Greek SAL','Portuguese HL','Portuguese FAL','Portuguese SAL','Serbian SAL','Spanish SAL'],'PI'],
+                    ['2026-10-14','14:00','17:00','Latin SAL','PI'],
+                    ['2026-10-15','09:00','12:00','Information Technology','PI (Practical)'],
+                    ['2026-10-15','14:00','16:30',['German HL','Gujarati HL','Hindi HL','Tamil HL','Telugu HL','Urdu HL'],'PII'],
+                    ['2026-10-15','14:00','16:00',['German SAL','Gujarati FAL','Gujarati SAL','Hebrew SAL','Hindi FAL','Hindi SAL','Tamil FAL','Tamil SAL','Telugu FAL','Telugu SAL','Urdu FAL','Urdu SAL'],'PII'],
+                    ['2026-10-16','09:00','12:00','Computer Applications Technology','PI (Practical)'],
+                    ['2026-10-16','14:00','17:00','Further Studies Physics',''],
+                    // Week 2
+                    ['2026-10-19','09:00','11:00','Further Studies Mathematics','PI (Standard)'],
+                    ['2026-10-19','13:00','14:00','Further Studies Mathematics','PII (Elective)'],
+                    ['2026-10-20','09:00','12:00',['Afrikaans HL','isiZulu HL','Sepedi HL'],'PI (Reading)'],
+                    ['2026-10-20','09:00','11:30',['Afrikaans FAL','isiXhosa FAL','isiZulu FAL','Sepedi FAL','Sesotho FAL','Setswana FAL','Siswati FAL','Xitsonga FAL'],'PI (Reading)'],
+                    ['2026-10-20','14:00','17:00','Maritime Economics',''],
+                    ['2026-10-21','09:00','12:00','Xitsonga HL','PIII'],
+                    ['2026-10-21','09:00','11:30','Tshivenda FAL','PIII'],
+                    ['2026-10-21','09:00','11:00','History','PI'],
+                    ['2026-10-22','09:00','12:00','Information Technology','PII (Theory)'],
+                    ['2026-10-22','09:00','11:30','Marine Sciences','PI'],
+                    ['2026-10-22','14:00','17:00','Further Studies English',''],
+                    ['2026-10-23','09:00','12:00','Business Studies',''],
+                    ['2026-10-23','14:00','16:30',['German HL','Gujarati HL','Gujarati FAL','Hindi HL','Hindi FAL','Portuguese HL','Portuguese FAL','Tamil HL','Tamil FAL','Telugu HL','Telugu FAL','Urdu HL','Urdu FAL'],'PIII'],
+                    // Week 3
+                    ['2026-10-26','09:00','12:00','Mathematics','PI'],
+                    ['2026-10-26','14:00','17:00','Sport and Exercise Science',''],
+                    ['2026-10-27','09:00','12:00','Dramatic Arts',''],
+                    ['2026-10-27','09:00','11:00',['Xitsonga HL','Tshivenda FAL'],'PI'],
+                    ['2026-10-28','09:00','12:00','Life Sciences','PI'],
+                    ['2026-10-29','09:00','12:00',['Consumer Studies','Hospitality Studies'],''],
+                    ['2026-10-29','14:00','17:00','Design',''],
+                    ['2026-10-30','09:00','12:00',['Afrikaans HL','isiZulu HL','Sepedi HL'],'PII (Writing)'],
+                    ['2026-10-30','09:00','11:30',['Afrikaans FAL','isiXhosa FAL','isiZulu FAL','Sepedi FAL','Sesotho FAL','Setswana FAL','Siswati FAL','Xitsonga FAL'],'PII (Writing)'],
+                    ['2026-10-30','14:00','17:00','Agricultural Sciences',''],
+                    // Week 4 (3–5 Nov: non-examination days)
+                    ['2026-11-02','09:00','12:00','Mathematical Literacy','PI'],
+                    ['2026-11-02','09:00','12:00','Physical Sciences','PI (Physics)'],
+                    ['2026-11-06','09:00','11:00','Life Sciences','PII'],
+                    // Week 5 (9 Nov: non-examination day)
+                    ['2026-11-10','09:00','12:00','Mathematics','PII'],
+                    ['2026-11-10','14:00','17:00','Electrical Technology',''],
+                    ['2026-11-10','14:00','17:00','Nautical Science','PI'],
+                    ['2026-11-11','09:00','12:00','History','PII'],
+                    ['2026-11-12','09:00','12:00','English HL','PI (Reading)'],
+                    ['2026-11-12','09:00','11:30','English FAL','PI (Reading)'],
+                    ['2026-11-13','09:00','12:00','Engineering Graphics and Design','PI'],
+                    ['2026-11-13','14:00','16:00',['Arabic SAL','French SAL','Italian SAL','Latin SAL','Mandarin SAL','Modern Greek SAL','Portuguese FAL','Portuguese SAL','Serbian SAL','Spanish SAL'],'PII'],
+                    ['2026-11-13','14:00','16:30','Portuguese HL','PII'],
+                    ['2026-11-13','14:00','17:00',['Equine Studies','Dance Studies'],''],
+                    // Week 6
+                    ['2026-11-16','09:00','12:00','Mathematical Literacy','PII'],
+                    ['2026-11-16','09:00','12:00','Physical Sciences','PII (Chemistry)'],
+                    ['2026-11-17','09:00','11:30',['Xitsonga HL','Tshivenda FAL','Marine Sciences'],'PII'],
+                    ['2026-11-17','09:00','12:00','Music','PI'],
+                    ['2026-11-17','14:00','17:00','Nautical Science','PII'],
+                    ['2026-11-17','14:00','15:30','Music','PII'],
+                    ['2026-11-18','09:00','11:00','Accounting','PI'],
+                    ['2026-11-18','14:00','16:00','Accounting','PII'],
+                    ['2026-11-19','09:00','12:00','English HL','PII (Reading)'],
+                    ['2026-11-19','09:00','11:30','English FAL','PII (Reading)'],
+                    ['2026-11-20','09:00','12:00','Economics',''],
+                    // Week 7
+                    ['2026-11-23','09:00','12:00','Geography','PI'],
+                    ['2026-11-23','14:00','15:30','Geography','PII'],
+                    ['2026-11-24','09:00','12:00','Tourism',''],
+                    ['2026-11-25','09:00','12:00','Visual Arts',''],
+                    ['2026-11-25','14:00','17:00','Agricultural Management Practices',''],
+                    ['2026-11-26','09:00','12:00','Engineering Graphics and Design','PII'],
+                    ['2026-11-27','09:00','12:00','Computer Applications Technology','PII (Theory)']
+                ]
+            },
+            nsc: {
+                label: 'NSC (DBE)',
+                source: 'DBE October/November 2026 NSC Examinations Timetable (Feb 2026)',
+                sessions: [
+                    ['2026-09-01','09:00','11:30','Life Orientation','CAT'],
+                    ['2026-10-12','09:00','11:30','Life Orientation','CAT Rewrite'],
+                    // Week 1
+                    ['2026-10-13','09:00','12:00','Computer Applications Technology','P1 (Practical)'],
+                    ['2026-10-13','14:00','16:00',['Hindi HL','Hindi FAL','Hindi SAL','Gujarati HL','Gujarati FAL','Gujarati SAL','Tamil HL','Tamil FAL','Tamil SAL','Telugu HL','Telugu FAL','Telugu SAL','Urdu HL','Urdu FAL','Urdu SAL','Hebrew SAL','German HL','German FAL','German SAL'],'P1'],
+                    ['2026-10-14','09:00','12:00','Information Technology','P1 (Practical)'],
+                    ['2026-10-14','14:00','16:00',['Arabic SAL','French SAL','Italian SAL','Mandarin SAL','Modern Greek SAL','Serbian SAL','Spanish SAL','Portuguese HL','Portuguese FAL','Portuguese SAL'],'P1'],
+                    ['2026-10-14','14:00','17:00','Latin SAL','P1'],
+                    ['2026-10-15','09:00','12:00','English HL','P3'],
+                    ['2026-10-15','09:00','11:30',['English FAL','English SAL'],'P3'],
+                    ['2026-10-15','14:00','16:30',['Hindi HL','Gujarati HL','Tamil HL','Telugu HL','Urdu HL','German HL'],'P2'],
+                    ['2026-10-15','14:00','16:00',['Hindi FAL','Hindi SAL','Gujarati FAL','Gujarati SAL','Tamil FAL','Tamil SAL','Telugu FAL','Telugu SAL','Urdu FAL','Urdu SAL','Hebrew SAL','German FAL','German SAL'],'P2'],
+                    ['2026-10-16','09:00','11:00','Economics','P1'],
+                    ['2026-10-16','09:00','12:00','Mechanical Technology',''],
+                    ['2026-10-16','14:00','17:00','Design','P1'],
+                    // Week 2
+                    ['2026-10-19','09:00','12:00',['isiZulu HL','isiXhosa HL','siSwati HL','isiNdebele HL'],'P3'],
+                    ['2026-10-19','09:00','11:30',['isiZulu FAL','isiXhosa FAL','siSwati FAL','isiNdebele FAL','isiZulu SAL','isiXhosa SAL','siSwati SAL','isiNdebele SAL'],'P3'],
+                    ['2026-10-19','14:00','16:30','Agricultural Sciences','P1'],
+                    ['2026-10-20','09:00','12:00','Afrikaans HL','P3'],
+                    ['2026-10-20','09:00','11:30',['Afrikaans FAL','Afrikaans SAL'],'P3'],
+                    ['2026-10-20','14:00','17:00','History','P1'],
+                    ['2026-10-20','14:00','17:00','Maritime Economics',''],
+                    ['2026-10-21','09:00','12:00',['Sepedi HL','Sesotho HL','Setswana HL','Xitsonga HL','Tshivenda HL','South African Sign Language HL'],'P3'],
+                    ['2026-10-21','09:00','11:30',['Sepedi FAL','Sesotho FAL','Setswana FAL','Xitsonga FAL','Tshivenda FAL','Sepedi SAL','Sesotho SAL','Setswana SAL','Xitsonga SAL','Tshivenda SAL'],'P3'],
+                    ['2026-10-21','14:00','17:00','Information Technology','P2 (Theory)'],
+                    ['2026-10-22','09:00','11:00','Accounting','P1'],
+                    ['2026-10-22','14:00','17:00','Engineering Graphics and Design','P1'],
+                    ['2026-10-22','14:00','16:30','Marine Sciences','P1'],
+                    ['2026-10-23','09:00','12:00',['Mathematics','Mathematical Literacy','Technical Mathematics'],'P1'],
+                    ['2026-10-23','14:00','16:30',['Hindi HL','Hindi FAL','Gujarati HL','Gujarati FAL','Tamil HL','Tamil FAL','Telugu HL','Telugu FAL','Urdu HL','Urdu FAL','Portuguese HL','Portuguese FAL','German HL','German FAL'],'P3'],
+                    // Week 3
+                    ['2026-10-26','09:00','12:00',['Mathematics','Mathematical Literacy','Technical Mathematics'],'P2'],
+                    ['2026-10-26','14:00','17:00','Sport and Exercise Science',''],
+                    ['2026-10-27','09:00','11:00',['Sepedi HL','Sesotho HL','Setswana HL','Xitsonga HL','Tshivenda HL','Sepedi FAL','Sesotho FAL','Setswana FAL','Xitsonga FAL','Tshivenda FAL','Sepedi SAL','Sesotho SAL','Setswana SAL','Xitsonga SAL','Tshivenda SAL','South African Sign Language HL'],'P1'],
+                    ['2026-10-27','14:00','17:00','Engineering Graphics and Design','P2'],
+                    ['2026-10-28','09:00','11:00',['English HL','English FAL','English SAL'],'P1'],
+                    ['2026-10-28','14:00','16:00','Accounting','P2'],
+                    ['2026-10-29','09:00','12:00','Geography','P1'],
+                    ['2026-10-29','14:00','17:00','Computer Applications Technology','P2 (Theory)'],
+                    ['2026-10-30','09:00','12:00','Physical Sciences','P1 (Physics)'],
+                    ['2026-10-30','09:00','12:00','Technical Sciences','P1'],
+                    ['2026-10-30','14:00','17:00','Tourism',''],
+                    // Week 4 (3–5 Nov: non-examination days)
+                    ['2026-11-02','09:00','12:00','Physical Sciences','P2 (Chemistry)'],
+                    ['2026-11-02','09:00','10:30','Technical Sciences','P2'],
+                    ['2026-11-02','14:00','16:00','Religion Studies','P1'],
+                    ['2026-11-06','09:00','11:00',['isiZulu HL','isiXhosa HL','siSwati HL','isiNdebele HL','isiZulu FAL','isiXhosa FAL','siSwati FAL','isiNdebele FAL','isiZulu SAL','isiXhosa SAL','siSwati SAL','isiNdebele SAL'],'P1'],
+                    ['2026-11-06','14:00','17:00',['Consumer Studies','Hospitality Studies'],''],
+                    // Week 5 (9 Nov: non-examination day)
+                    ['2026-11-10','09:00','11:30',['isiZulu HL','isiXhosa HL','siSwati HL','isiNdebele HL','isiZulu FAL','isiXhosa FAL','siSwati FAL','isiNdebele FAL'],'P2'],
+                    ['2026-11-10','09:00','10:30',['isiZulu SAL','isiXhosa SAL','siSwati SAL','isiNdebele SAL'],'P2'],
+                    ['2026-11-10','14:00','17:00','Electrical Technology',''],
+                    ['2026-11-10','14:00','17:00','Nautical Science','P1'],
+                    ['2026-11-11','09:00','11:00',['Afrikaans HL','Afrikaans FAL','Afrikaans SAL'],'P1'],
+                    ['2026-11-11','14:00','16:00','Business Studies','P1'],
+                    ['2026-11-12','09:00','12:00','Geography','P2'],
+                    ['2026-11-12','14:00','16:00','Religion Studies','P2'],
+                    ['2026-11-13','09:00','11:30','Life Sciences','P1'],
+                    ['2026-11-13','14:00','16:00',['Arabic SAL','French SAL','Italian SAL','Mandarin SAL','Modern Greek SAL','Serbian SAL','Spanish SAL','Latin SAL','Portuguese FAL','Portuguese SAL'],'P2'],
+                    ['2026-11-13','14:00','16:30','Portuguese HL','P2'],
+                    ['2026-11-13','14:00','17:00','Equine Studies',''],
+                    // Week 6
+                    ['2026-11-16','09:00','11:30','Life Sciences','P2'],
+                    ['2026-11-16','14:00','17:00',['Dramatic Arts','Civil Technology'],''],
+                    ['2026-11-17','09:00','11:30',['Sepedi HL','Sesotho HL','Setswana HL','Xitsonga HL','Tshivenda HL','Sepedi FAL','Sesotho FAL','Setswana FAL','Xitsonga FAL','Tshivenda FAL','South African Sign Language HL'],'P2'],
+                    ['2026-11-17','09:00','10:30',['Sepedi SAL','Sesotho SAL','Setswana SAL','Xitsonga SAL','Tshivenda SAL'],'P2'],
+                    ['2026-11-17','14:00','16:30','Agricultural Sciences','P2'],
+                    ['2026-11-17','14:00','17:00','Nautical Science','P2'],
+                    ['2026-11-18','09:00','11:00','Business Studies','P2'],
+                    ['2026-11-18','14:00','17:00','Visual Arts','P1'],
+                    ['2026-11-19','09:00','11:30',['English HL','English FAL'],'P2'],
+                    ['2026-11-19','09:00','10:30','English SAL','P2'],
+                    ['2026-11-19','14:00','17:00','History','P2'],
+                    ['2026-11-20','09:00','11:30',['Afrikaans HL','Afrikaans FAL'],'P2'],
+                    ['2026-11-20','09:00','10:30','Afrikaans SAL','P2'],
+                    ['2026-11-20','14:00','16:00','Economics','P2'],
+                    // Week 7
+                    ['2026-11-23','09:00','12:00','Agricultural Technology',''],
+                    ['2026-11-23','14:00','17:00','Music','P1 (Theory)'],
+                    ['2026-11-24','09:00','12:00','Agricultural Management Practices',''],
+                    ['2026-11-24','09:00','11:30','Marine Sciences','P2'],
+                    ['2026-11-24','14:00','17:00','Dance Studies',''],
+                    ['2026-11-25','09:00','10:30','Music','P2 (Comprehension)'],
+                    ['2026-11-26','09:00','12:00','Computer Applications Technology','P1 Rewrite (Practical)'],
+                    ['2026-11-26','09:00','12:00','Information Technology','P1 Rewrite (Practical)']
+                ]
+            }
+        };
+
+        // Subjects most Genius students take — listed first in the picker.
+        const MATRIC_COMMON = [
+            'Mathematics','Mathematical Literacy','English HL','English FAL','Afrikaans HL','Afrikaans FAL',
+            'isiZulu HL','isiZulu FAL','isiXhosa HL','isiXhosa FAL','Physical Sciences','Life Sciences',
+            'Accounting','Business Studies','Economics','Geography','History','Information Technology',
+            'Computer Applications Technology','Life Orientation','Visual Arts','Dramatic Arts','Music','Design',
+            'Consumer Studies','Tourism','Engineering Graphics and Design','Further Studies Mathematics',
+            'Further Studies Physics','Further Studies English','Further Studies Chemistry','French SAL','Mandarin SAL'
+        ];
+
+        const _matricFlatCache = {};
+        function matricSessions(board) {
+            if (_matricFlatCache[board]) return _matricFlatCache[board];
+            const tt = MATRIC_TIMETABLES[board];
+            const out = [];
+            (tt ? tt.sessions : []).forEach(s => {
+                const [date, start, end, subj, paper] = s;
+                (Array.isArray(subj) ? subj : [subj]).forEach(name => {
+                    out.push({
+                        date, start, end, subject: name, paper: paper || '',
+                        label: paper ? `${name} ${paper}` : name,
+                        startMin: toMin(start), endMin: toMin(end)
+                    });
+                });
+            });
+            _matricFlatCache[board] = out;
+            return out;
+        }
+
+        function matricSubjectsFor(board) {
+            const seen = new Set();
+            matricSessions(board).forEach(s => seen.add(s.subject));
+            const common = MATRIC_COMMON.filter(n => seen.has(n));
+            const other = [...seen].filter(n => !MATRIC_COMMON.includes(n)).sort((a, b) => a.localeCompare(b));
+            return { common, other };
+        }
+
+        function toMin(hhmm) { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; }
+        function fmtMin(min) { return `${String(Math.floor(min / 60)).padStart(2, '0')}h${String(min % 60).padStart(2, '0')}`; }
+
+        // Per-student matric settings, normalised in place.
+        function getMatric(data) {
+            if (!data) return null;
+            if (!data.matric || typeof data.matric !== 'object') {
+                data.matric = { enabled: false, board: 'ieb', subjects: [], exportMode: 'ask' };
+            }
+            const m = data.matric;
+            if (!MATRIC_TIMETABLES[m.board]) m.board = 'ieb';
+            if (!Array.isArray(m.subjects)) m.subjects = [];
+            if (!['ask', 'with', 'without'].includes(m.exportMode)) m.exportMode = 'ask';
+            m.enabled = !!m.enabled;
+            return m;
+        }
+
+        // Monday of the week that contains the "Week Commencing" date (local time).
+        function weekMonday(dateStr) {
+            if (!dateStr) return null;
+            const parts = dateStr.split('-').map(Number);
+            if (parts.length !== 3 || parts.some(isNaN)) return null;
+            const d = new Date(parts[0], parts[1] - 1, parts[2]);
+            if (isNaN(d.getTime())) return null;
+            d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+            return d;
+        }
+        function isoLocal(d) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        // Exam sessions that fall inside this student's week (filtered by their subjects).
+        function getWeekExams(data) {
+            const m = getMatric(data);
+            if (!m || !m.enabled) return [];
+            const monday = weekMonday(data.date);
+            if (!monday) return [];
+            const dates = [];
+            for (let i = 0; i < 7; i++) { const d = new Date(monday); d.setDate(monday.getDate() + i); dates.push(isoLocal(d)); }
+            const sel = new Set(m.subjects);
+            return matricSessions(m.board)
+                .filter(s => dates.indexOf(s.date) >= 0 && (sel.size === 0 || sel.has(s.subject)))
+                .map(s => Object.assign({}, s, { dayIdx: dates.indexOf(s.date) }));
+        }
+
+        // Draw the ghost blocks. Sessions sharing a day + time slot are merged
+        // into one block so twenty language papers don't stack on each other.
+        function renderExamGhosts(weekExams) {
+            document.querySelectorAll('.exam-ghost').forEach(e => e.remove());
+            const data = getActiveData();
+            const note = document.getElementById('outExamNote');
+            const exams = weekExams || (data ? getWeekExams(data) : []);
+            if (!data || !exams.length) { if (note) note.style.display = 'none'; return; }
+
+            const m = getMatric(data);
+            if (note) {
+                note.innerText = `Matric exam sessions shown · ${MATRIC_TIMETABLES[m.board].label} 2026 final timetable`;
+                note.style.display = 'block';
+            }
+
+            const sHour = data.startHour || 6, eHour = data.endHour || 20;
+            const showWknd = data.showWeekends !== false;
+            const gridTop = sHour * 60, gridBot = eHour * 60;
+
+            const groups = {};
+            exams.forEach(x => {
+                const k = `${x.dayIdx}|${x.startMin}|${x.endMin}`;
+                if (!groups[k]) groups[k] = { dayIdx: x.dayIdx, startMin: x.startMin, endMin: x.endMin, labels: [] };
+                groups[k].labels.push(x.label);
+            });
+
+            Object.values(groups).forEach(g => {
+                if (!showWknd && g.dayIdx > 4) return;
+                const s = Math.max(g.startMin, gridTop), e = Math.min(g.endMin, gridBot);
+                if (e <= s) return; // entirely outside the visible hours
+                const startLine = Math.round((s - gridTop) / 15) + 2;
+                const span = Math.max(1, Math.round((e - s) / 15));
+
+                const div = document.createElement('div');
+                div.className = 'exam-ghost';
+                if (span <= 2) div.classList.add('exam-short');
+                if (s > g.startMin || e < g.endMin) div.classList.add('exam-clipped');
+                div.style.gridColumn = g.dayIdx + 2;
+                div.style.gridRow = `${startLine} / span ${span}`;
+
+                const timeStr = `${fmtMin(g.startMin)} - ${fmtMin(g.endMin)}`;
+                const shown = g.labels.slice(0, 3);
+                const extra = g.labels.length - shown.length;
+                let html = `<span class="exam-tag">📝 Exam</span>`;
+                html += `<strong>${escapeHtml(shown[0])}</strong>`;
+                shown.slice(1).forEach(l => { html += `<span class="exam-sub">${escapeHtml(l)}</span>`; });
+                if (extra > 0) html += `<span class="exam-more">+${extra} more</span>`;
+                html += `<span class="exam-time">${timeStr}</span>`;
+                div.innerHTML = html;
+                div.title = `Matric exam · ${g.labels.join(', ')} · ${timeStr}`;
+                grid.appendChild(div);
+            });
+        }
+
+        // Keep the toggle + "Exam subjects" button in step with the active student.
+        function syncMatricControls(clashCount) {
+            const data = getActiveData();
+            const toggle = document.getElementById('toggleMatric');
+            const btn = document.getElementById('btnMatricSetup');
+            if (!toggle || !btn) return;
+            const m = getMatric(data);
+            if (!m) { toggle.checked = false; toggle.disabled = true; btn.style.display = 'none'; return; }
+            toggle.disabled = false;
+            toggle.checked = m.enabled;
+            btn.style.display = m.enabled ? 'inline-block' : 'none';
+            if (!m.enabled) return;
+            const n = m.subjects.length;
+            let label = `🎓 ${MATRIC_TIMETABLES[m.board].label} · ${n ? `${n} subject${n === 1 ? '' : 's'}` : 'All subjects'}`;
+            if (clashCount > 0) label += `<span class="clash-chip">⚠ ${clashCount} clash${clashCount === 1 ? '' : 'es'}</span>`;
+            btn.innerHTML = label;
+        }
+
+        function handleMatricToggle() {
+            const data = getActiveData();
+            if (!data) return;
+            const m = getMatric(data);
+            m.enabled = document.getElementById('toggleMatric').checked;
+            triggerSave(); renderEvents();
+            if (!m.enabled) return;
+
+            const firstTime = m.subjects.length === 0;
+            if (firstTime) openMatricModal();
+
+            const sHour = data.startHour || 6;
+            if (sHour > 9) {
+                showDialog(
+                    'Show morning exams?',
+                    `Matric papers start at 09h00 but this grid starts at ${String(sHour).padStart(2, '0')}h00. Extend the grid to start at 08h00 so exam sessions are visible?`,
+                    true,
+                    (ok) => {
+                        if (!ok) return;
+                        data.startHour = 8;
+                        document.getElementById('timeStart').value = 8;
+                        triggerSave(); drawEmptyGrid(); renderEvents();
+                    }
+                );
+            }
+        }
+
+        function openMatricModal() {
+            const data = getActiveData();
+            if (!data) return;
+            getMatric(data);
+            document.getElementById('matricSubjectSearch').value = '';
+            refreshMatricModal();
+            openOverlay('matricModal');
+        }
+        function closeMatricModal() { closeOverlay('matricModal'); }
+
+        function refreshMatricModal() {
+            const data = getActiveData();
+            if (!data) return;
+            const m = getMatric(data);
+            document.querySelectorAll('#matricBoardSeg button').forEach(b => b.classList.toggle('active', b.dataset.board === m.board));
+            document.getElementById('matricExportMode').value = m.exportMode;
+            renderMatricSubjectList();
+
+            const note = document.getElementById('matricSourceNote');
+            const weekExams = getWeekExams(data);
+            let txt = `Source: ${MATRIC_TIMETABLES[m.board].source}.`;
+            if (!data.date) txt += ' Set "Week Commencing" to a week between 13 Oct and 27 Nov 2026 to see sessions.';
+            else if (m.enabled) txt += ` ${weekExams.length} session${weekExams.length === 1 ? '' : 's'} fall in this week.`;
+            note.innerText = txt;
+        }
+
+        function setMatricBoard(board) {
+            const data = getActiveData();
+            if (!data || !MATRIC_TIMETABLES[board]) return;
+            const m = getMatric(data);
+            m.board = board;
+            // Keep only subjects that exist on the new board's timetable.
+            const valid = new Set(matricSessions(board).map(s => s.subject));
+            m.subjects = m.subjects.filter(s => valid.has(s));
+            triggerSave(); renderEvents(); refreshMatricModal();
+        }
+
+        function renderMatricSubjectList() {
+            const data = getActiveData();
+            if (!data) return;
+            const m = getMatric(data);
+            const list = document.getElementById('matricSubjectList');
+            const q = (document.getElementById('matricSubjectSearch').value || '').trim().toLowerCase();
+            const { common, other } = matricSubjectsFor(m.board);
+            const sel = new Set(m.subjects);
+            const chip = (name) => {
+                const on = sel.has(name);
+                const safe = escapeHtml(name);
+                return `<label class="${on ? 'on' : ''}"><input type="checkbox" ${on ? 'checked' : ''} onchange="toggleMatricSubject(this.value, this.checked)" value="${safe}">${on ? '✓ ' : ''}${safe}</label>`;
+            };
+            const f = (arr) => arr.filter(n => !q || n.toLowerCase().includes(q));
+            const c = f(common), o = f(other);
+            let html = '';
+            if (c.length) html += `<div class="subj-group">Common subjects</div>` + c.map(chip).join('');
+            if (o.length) html += `<div class="subj-group">Other subjects</div>` + o.map(chip).join('');
+            if (!html) html = `<div class="subj-empty">No subjects match "${escapeHtml(q)}".</div>`;
+            list.innerHTML = html;
+            const count = document.getElementById('matricSubjCount');
+            count.innerText = sel.size ? `(${sel.size} selected)` : '(none selected — all papers shown)';
+        }
+
+        function toggleMatricSubject(name, checked) {
+            const data = getActiveData();
+            if (!data) return;
+            const m = getMatric(data);
+            const i = m.subjects.indexOf(name);
+            if (checked && i < 0) m.subjects.push(name);
+            if (!checked && i >= 0) m.subjects.splice(i, 1);
+            triggerSave(); renderEvents(); refreshMatricModal();
+        }
+
+        function clearMatricSubjects() {
+            const data = getActiveData();
+            if (!data) return;
+            getMatric(data).subjects = [];
+            triggerSave(); renderEvents(); refreshMatricModal();
+        }
+
+        function setMatricExportMode(mode) {
+            const data = getActiveData();
+            if (!data) return;
+            getMatric(data).exportMode = mode;
+            triggerSave();
+        }
+
         // --- Save System ---
         async function triggerSave() {
             let activeId = getActiveTabId();
@@ -2424,7 +3027,7 @@
             if(!data) return;
             data.name = document.getElementById('studentName').value;
             data.date = document.getElementById('weekDate').value;
-            triggerSave(); renderTabs(); updateCanvasHeaders();
+            triggerSave(); renderTabs(); updateCanvasHeaders(); renderEvents();
         }
 
         function handleTimeUpdate() {
@@ -2497,6 +3100,7 @@
                 document.getElementById('outName').innerText = 'Student Schedule';
                 document.getElementById('outDate').innerText = 'Week Commencing: ---';
                 if (themeSel) themeSel.value = 'none';
+                syncMatricControls();
                 return;
             }
 
@@ -2509,6 +3113,7 @@
             document.getElementById('timeEnd').value = data.endHour || 20;
             document.getElementById('toggleWeekends').checked = data.showWeekends !== false;
             if (themeSel) themeSel.value = data.theme || 'none';
+            syncMatricControls();
 
             // Sharing UI removed (personal-only build): no owner tag to show.
             if (ownerTag) ownerTag.style.display = 'none';
@@ -2773,6 +3378,8 @@
 
             let sHour = data.startHour || 6;
             let showWknd = data.showWeekends !== false;
+            const weekExams = getWeekExams(data);
+            let clashCount = 0;
 
             data.events.forEach(ev => {
                 if (!showWknd && ev.col > 6) return;
@@ -2796,7 +3403,17 @@
                 div.style.gridColumn = ev.col;
                 div.style.gridRow = `${gridStartLine} / span ${rowSpan}`;
 
+                // Matric clash: does this lesson overlap an exam session on the same day?
+                const evStart = ev.startHourVal * 60 + ev.startMinVal, evEnd = endH * 60 + endM;
+                const clash = weekExams.find(x => (x.dayIdx + 2) === ev.col && x.startMin < evEnd && x.endMin > evStart);
+                if (clash) {
+                    clashCount++;
+                    div.classList.add('event-clash');
+                    div.title = `Clashes with matric exam: ${clash.label} (${fmtMin(clash.startMin)} - ${fmtMin(clash.endMin)})`;
+                }
+
                 let contentHTML = `<span class="event-delete" onclick="deleteEvent('${ev.id}'); event.stopPropagation();">×</span>`;
+                if (clash) contentHTML += `<span class="clash-badge" data-html2canvas-ignore="true">⚠ Exam clash</span>`;
                 let tutorHTML = ev.tutor ? `<span>${ev.tutor}</span>` : '';
                 let locHTML = ev.location ? `<span style="font-style: italic; opacity: 0.9;">${ev.location}</span>` : '';
 
@@ -2825,6 +3442,9 @@
             // One render only — a later re-render of the same events shouldn't
             // replay the entrance.
             justSavedGroupId = null;
+
+            renderExamGhosts(weekExams);
+            syncMatricControls(clashCount);
         }
 
         function clearCurrentSchedule() {
@@ -2966,7 +3586,25 @@
             }, 400);
         }
 
+        // Save / Export entry point. If this week carries matric exam sessions,
+        // the student's setting decides: always include, never include, or ask.
         function exportSchedule() {
+            const data = getActiveData();
+            const exams = data ? getWeekExams(data) : [];
+            if (!exams.length) { performExport(false); return; }
+            const m = getMatric(data);
+            if (m.exportMode === 'with') { performExport(true); return; }
+            if (m.exportMode === 'without') { performExport(false); return; }
+            openOverlay('exportChoiceModal');
+        }
+
+        function resolveExportChoice(choice) {
+            closeOverlay('exportChoiceModal');
+            if (choice === null) return;
+            performExport(!!choice);
+        }
+
+        function performExport(includeExams) {
             setExportBusy(true);
             // If a theme preview flash is mid-flight, settle the card first
             // so the dark-card save/restore below sees the true screen state.
@@ -2982,6 +3620,9 @@
             // exports on WHITE (or themed). Remove dark-card before capture.
             const hadDarkCard = captureArea.classList.contains('dark-card');
             if (hadDarkCard) captureArea.classList.remove('dark-card');
+
+            // MATRIC: exam ghost blocks + note are hidden unless asked for.
+            if (!includeExams) captureArea.classList.add('hide-exams');
 
             // GIRLY POP: exports always use the normal on-brand look, never pink.
             const hadGirly = document.body.classList.contains('girly-pop');
@@ -3025,6 +3666,7 @@
 
             const cleanup = () => {
                 deleteBtns.forEach(btn => btn.style.display = '');
+                captureArea.classList.remove('hide-exams');
                 captureArea.style.width = prevCardWidth;
                 captureArea.style.maxWidth = prevCardMaxWidth;
                 if (gridScroll) gridScroll.style.overflowX = prevOverflow;
@@ -3254,6 +3896,7 @@
                 startHour: student.startHour,
                 endHour: student.endHour,
                 showWeekends: student.showWeekends,
+                matric: student.matric ? JSON.parse(JSON.stringify(student.matric)) : null,
                 events: deepCopyEvents(student.events)
             };
         }
@@ -3349,6 +3992,7 @@
                 data.startHour = snap.startHour;
                 data.endHour = snap.endHour;
                 data.showWeekends = snap.showWeekends;
+                if (snap.matric) data.matric = JSON.parse(JSON.stringify(snap.matric));
                 data.events = (snap.events || []).map(e => {
                     const copy = Object.assign({}, e);
                     copy.id = 'evt_' + Date.now() + '_' + Math.floor(Math.random() * 100000);

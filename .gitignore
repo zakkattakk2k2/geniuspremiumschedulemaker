@@ -1,0 +1,7 @@
+# Local-only files (not part of the deployed site)
+.claude/settings.local.json
+*.gs
+index_OLD_backup.html
+index_backup_*.html
+Thumbs.db
+.DS_Store

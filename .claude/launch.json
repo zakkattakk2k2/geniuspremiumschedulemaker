@@ -1,0 +1,24 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "static",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "4173"],
+      "port": 4173
+    },
+    {
+      "name": "lab-web",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+      "runtimeArgs": [
+        "C:\\Users\\zakar\\OneDrive\\Desktop\\lab-inventory\\node_modules\\vite\\bin\\vite.js",
+        "--config",
+        "C:\\Users\\zakar\\OneDrive\\Desktop\\lab-inventory\\packages\\web\\vite.config.ts",
+        "--port",
+        "5173",
+        "C:\\Users\\zakar\\OneDrive\\Desktop\\lab-inventory\\packages\\web"
+      ],
+      "port": 5173
+    }
+  ]
+}
