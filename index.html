@@ -1537,6 +1537,43 @@
         body.girly-pop .subject-list label.on { background: #e60073; color: #fff; border-color: #e60073; }
         body.girly-pop .seg button { background: #ffe0f3; color: #b3046a; }
         body.girly-pop .seg button.active { background: #e60073; color: #fff; }
+
+        /* ============================================== */
+        /* ===== PER-STUDENT TEST DATES (ghosts)     ===== */
+        /* ============================================== */
+        .exam-ghost.is-test { border-color: #c9a227; }
+        .exam-ghost.is-test .exam-tag { color: #8a6d0b; }
+        #capture-area.dark-card .exam-ghost.is-test { border-color: rgba(212,175,55,0.75); }
+        #capture-area.dark-card .exam-ghost.is-test .exam-tag { color: var(--accent-gold); }
+
+        .test-form-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .test-form-row > div { flex: 1 1 80px; min-width: 0; }
+        .modal input[type="date"] {
+            width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 4px; font-family: inherit; font-size: 0.95rem;
+            border: 1px solid rgba(255,255,255,0.12); background: #1b2029; color: #f5f6f8; color-scheme: dark;
+        }
+        .modal input[type="date"]:focus { outline: none; border-color: var(--accent-gold); box-shadow: 0 0 0 2px rgba(212,175,55,0.25); }
+        .tests-list {
+            max-height: 170px; overflow-y: auto; background: #1b2029; border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px; padding: 5px; margin-bottom: 12px;
+        }
+        .test-item {
+            display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 7px 10px;
+            background: #232a35; border-radius: 4px; margin-bottom: 5px; font-size: 0.82rem; color: #f5f6f8;
+        }
+        .test-item.is-past { opacity: 0.55; }
+        .test-item .test-meta { display: flex; flex-direction: column; gap: 1px; overflow: hidden; }
+        .test-item .test-when { font-size: 0.7rem; color: #b8bcc4; font-weight: 600; }
+        .test-item .test-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .test-item .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .test-item button { padding: 4px 9px; font-size: 0.72rem; border-radius: 4px; font-weight: 600; }
+        .item-edit { background: var(--accent-gold); color: #14181f; }
+        .item-edit:hover { background: #e6c14d; }
+        .tests-empty { color: #8a909b; font-size: 0.8rem; padding: 6px; }
+        body.girly-pop .tests-list { background: #fff0f8; border-color: #ffb3de; }
+        body.girly-pop .test-item { background: #ffe9f5; color: #7a1f55; }
+        body.girly-pop .test-item .test-when { color: #b3046a; }
+        body.girly-pop .item-edit { background: #e60073; color: #fff; }
     </style>
 </head>
 <body class="intro-running">
@@ -1773,6 +1810,12 @@
                     <button id="btnMatricSetup" class="btn-secondary" onclick="openMatricModal()" style="display:none;">🎓 Exam subjects</button>
                 </div>
             </div>
+            <div class="input-group">
+                <label>Test Dates</label>
+                <div class="matric-wrap">
+                    <button id="btnTests" class="btn-secondary" onclick="openTestsModal()" title="Enter this student's tests and exams for the term; they ghost onto the matching week">📝 Test dates</button>
+                </div>
+            </div>
         </div>
 
         <div class="btn-group">
@@ -1997,11 +2040,73 @@
         </div>
     </div>
 
+    <!-- Per-student Test Dates Modal -->
+    <div class="modal-overlay" id="testsModal" data-html2canvas-ignore="true">
+        <div class="modal">
+            <h3>📝 Test &amp; Exam Dates</h3>
+            <p class="matric-hint">Enter this student's tests once — for the whole term, or as the dates come in. Each one ghosts onto the matching week automatically so lessons can be planned around it. These belong to this student only.</p>
+
+            <div class="test-form-row">
+                <div style="flex: 2 1 180px;">
+                    <label>Subject / title</label>
+                    <input type="text" id="tSubject" placeholder="e.g. Maths test, Physics prac, Afrikaans oral">
+                </div>
+                <div>
+                    <label>Type</label>
+                    <select id="tKind">
+                        <option value="Test">Test</option>
+                        <option value="Exam">Exam</option>
+                        <option value="Prelim">Prelim</option>
+                        <option value="Assessment">Assessment</option>
+                        <option value="Oral">Oral</option>
+                        <option value="Practical">Practical</option>
+                    </select>
+                </div>
+            </div>
+            <div class="test-form-row">
+                <div style="flex: 1.6 1 120px;">
+                    <label>Date</label>
+                    <input type="date" id="tDate">
+                </div>
+                <div>
+                    <label>Start</label>
+                    <input type="text" id="tStart" placeholder="08h00">
+                </div>
+                <div>
+                    <label>End</label>
+                    <input type="text" id="tEnd" placeholder="09h00">
+                </div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin: -4px 0 14px;">
+                <button type="button" class="btn-ghost" id="tCancelEdit" style="display:none;" onclick="resetTestForm()">Cancel edit</button>
+                <button type="button" class="btn-primary" id="tSaveBtn" onclick="saveTestEntry()">Add test</button>
+            </div>
+
+            <label>Upcoming <span id="testsCount" style="font-weight:400; opacity:0.8;"></span></label>
+            <div class="tests-list" id="testsList"></div>
+            <label>Past</label>
+            <div class="tests-list" id="testsListPast" style="max-height: 110px;"></div>
+
+            <div class="matric-row">
+                <label for="testsExportMode">Test &amp; exam times in downloads</label>
+                <select id="testsExportMode" onchange="setMatricExportMode(this.value)">
+                    <option value="ask">Ask me each time</option>
+                    <option value="with">Always include</option>
+                    <option value="without">Never include</option>
+                </select>
+            </div>
+
+            <div class="btn-group" style="justify-content: flex-end; width: 100%;">
+                <button style="background:#ccc; color:#333;" onclick="closeTestsModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Export choice: with / without exam times -->
     <div class="modal-overlay" id="exportChoiceModal" data-html2canvas-ignore="true" style="z-index: 2000;">
         <div class="modal" style="text-align:center;">
             <h3>Save / Export</h3>
-            <p style="margin-bottom: 20px; color: #b8bcc4;">This week has matric exam sessions. Include the exam times in the image?</p>
+            <p style="margin-bottom: 20px; color: #b8bcc4;">This week has test or exam sessions. Include their times in the image?</p>
             <div class="btn-group" style="justify-content: center; flex-wrap: wrap;">
                 <button style="background:#ccc; color:#333;" onclick="resolveExportChoice(null)">Cancel</button>
                 <button class="btn-secondary" onclick="resolveExportChoice(false)">Without exam times</button>
@@ -2137,6 +2242,12 @@
         window.clearMatricSubjects = clearMatricSubjects;
         window.setMatricExportMode = setMatricExportMode;
         window.resolveExportChoice = resolveExportChoice;
+        window.openTestsModal = openTestsModal;
+        window.closeTestsModal = closeTestsModal;
+        window.saveTestEntry = saveTestEntry;
+        window.resetTestForm = resetTestForm;
+        window.editTestEntry = editTestEntry;
+        window.deleteTestEntry = deleteTestEntry;
 
         // Data Helpers
         function getMySchedules() {
@@ -2188,6 +2299,7 @@
                 if (!Array.isArray(s.versions)) s.versions = [];
                 if (typeof s.theme === 'undefined' || s.theme === null) s.theme = 'none';
                 getMatric(s); // normalise matric overlay settings
+                getTests(s);  // normalise per-student test dates
             });
             return dataObj;
         }
@@ -2638,18 +2750,35 @@
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
-        // Exam sessions that fall inside this student's week (filtered by their subjects).
+        // Everything that should ghost onto this student's week: the national
+        // matric sessions (if enabled, filtered by subject) plus the student's own
+        // test dates. Tests live on the student record, so they can never leak
+        // onto another student's schedule.
         function getWeekExams(data) {
-            const m = getMatric(data);
-            if (!m || !m.enabled) return [];
+            if (!data) return [];
             const monday = weekMonday(data.date);
             if (!monday) return [];
             const dates = [];
             for (let i = 0; i < 7; i++) { const d = new Date(monday); d.setDate(monday.getDate() + i); dates.push(isoLocal(d)); }
-            const sel = new Set(m.subjects);
-            return matricSessions(m.board)
-                .filter(s => dates.indexOf(s.date) >= 0 && (sel.size === 0 || sel.has(s.subject)))
-                .map(s => Object.assign({}, s, { dayIdx: dates.indexOf(s.date) }));
+
+            const out = [];
+            const m = getMatric(data);
+            if (m && m.enabled) {
+                const sel = new Set(m.subjects);
+                matricSessions(m.board)
+                    .filter(s => dates.indexOf(s.date) >= 0 && (sel.size === 0 || sel.has(s.subject)))
+                    .forEach(s => out.push(Object.assign({}, s, { dayIdx: dates.indexOf(s.date), kind: 'exam' })));
+            }
+            getTests(data).forEach(t => {
+                const i = dates.indexOf(t.date);
+                if (i < 0) return;
+                out.push({
+                    date: t.date, start: t.start, end: t.end, subject: t.subject, paper: '',
+                    label: t.subject, startMin: toMin(t.start), endMin: toMin(t.end),
+                    dayIdx: i, kind: 'test', kindLabel: t.kind || 'Test'
+                });
+            });
+            return out;
         }
 
         // Draw the ghost blocks. Sessions sharing a day + time slot are merged
@@ -2663,7 +2792,10 @@
 
             const m = getMatric(data);
             if (note) {
-                note.innerText = `Matric exam sessions shown · ${MATRIC_TIMETABLES[m.board].label} 2026 final timetable`;
+                const parts = [];
+                if (exams.some(x => x.kind !== 'test')) parts.push(`Matric exam sessions shown · ${MATRIC_TIMETABLES[m.board].label} 2026 final timetable`);
+                if (exams.some(x => x.kind === 'test')) parts.push('Test dates shown');
+                note.innerText = parts.join(' · ');
                 note.style.display = 'block';
             }
 
@@ -2673,8 +2805,9 @@
 
             const groups = {};
             exams.forEach(x => {
-                const k = `${x.dayIdx}|${x.startMin}|${x.endMin}`;
-                if (!groups[k]) groups[k] = { dayIdx: x.dayIdx, startMin: x.startMin, endMin: x.endMin, labels: [] };
+                const kind = x.kind === 'test' ? 'test' : 'exam';
+                const k = `${kind}|${x.dayIdx}|${x.startMin}|${x.endMin}`;
+                if (!groups[k]) groups[k] = { kind, tag: kind === 'test' ? (x.kindLabel || 'Test') : 'Exam', dayIdx: x.dayIdx, startMin: x.startMin, endMin: x.endMin, labels: [] };
                 groups[k].labels.push(x.label);
             });
 
@@ -2686,7 +2819,7 @@
                 const span = Math.max(1, Math.round((e - s) / 15));
 
                 const div = document.createElement('div');
-                div.className = 'exam-ghost';
+                div.className = 'exam-ghost' + (g.kind === 'test' ? ' is-test' : '');
                 if (span <= 2) div.classList.add('exam-short');
                 if (s > g.startMin || e < g.endMin) div.classList.add('exam-clipped');
                 div.style.gridColumn = g.dayIdx + 2;
@@ -2695,13 +2828,13 @@
                 const timeStr = `${fmtMin(g.startMin)} - ${fmtMin(g.endMin)}`;
                 const shown = g.labels.slice(0, 3);
                 const extra = g.labels.length - shown.length;
-                let html = `<span class="exam-tag">📝 Exam</span>`;
+                let html = `<span class="exam-tag">📝 ${escapeHtml(g.tag)}</span>`;
                 html += `<strong>${escapeHtml(shown[0])}</strong>`;
                 shown.slice(1).forEach(l => { html += `<span class="exam-sub">${escapeHtml(l)}</span>`; });
                 if (extra > 0) html += `<span class="exam-more">+${extra} more</span>`;
                 html += `<span class="exam-time">${timeStr}</span>`;
                 div.innerHTML = html;
-                div.title = `Matric exam · ${g.labels.join(', ')} · ${timeStr}`;
+                div.title = `${g.kind === 'test' ? g.tag : 'Matric exam'} · ${g.labels.join(', ')} · ${timeStr}`;
                 grid.appendChild(div);
             });
         }
@@ -2713,7 +2846,13 @@
             const btn = document.getElementById('btnMatricSetup');
             if (!toggle || !btn) return;
             const m = getMatric(data);
-            if (!m) { toggle.checked = false; toggle.disabled = true; btn.style.display = 'none'; return; }
+            const tBtn = document.getElementById('btnTests');
+            if (!m) { toggle.checked = false; toggle.disabled = true; btn.style.display = 'none'; if (tBtn) tBtn.disabled = true; return; }
+            if (tBtn) {
+                tBtn.disabled = false;
+                const up = upcomingTests(data).length;
+                tBtn.innerText = up ? `📝 Test dates (${up} upcoming)` : '📝 Test dates';
+            }
             toggle.disabled = false;
             toggle.checked = m.enabled;
             btn.style.display = m.enabled ? 'inline-block' : 'none';
@@ -2834,6 +2973,152 @@
             if (!data) return;
             getMatric(data).exportMode = mode;
             triggerSave();
+        }
+
+        // ================================================
+        // ===== PER-STUDENT TEST DATES                =====
+        // ================================================
+        // Tutors enter a student's tests once (for the term, or as dates arrive);
+        // getWeekExams picks up whichever fall in the displayed week.
+        function getTests(data) {
+            if (!data) return [];
+            if (!Array.isArray(data.tests)) data.tests = [];
+            data.tests = data.tests.filter(t =>
+                t && typeof t === 'object' &&
+                /^\d{4}-\d{2}-\d{2}$/.test(t.date || '') &&
+                /^\d{2}:\d{2}$/.test(t.start || '') &&
+                /^\d{2}:\d{2}$/.test(t.end || ''));
+            return data.tests;
+        }
+        function sortTests(list) {
+            list.sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+            return list;
+        }
+        function todayISO() { return isoLocal(new Date()); }
+        function upcomingTests(data) { const t = todayISO(); return getTests(data).filter(x => x.date >= t); }
+        function hhmm(p) { return `${String(p.h).padStart(2, '0')}:${String(p.m).padStart(2, '0')}`; }
+        function prettyDate(iso) {
+            const [y, mo, d] = iso.split('-').map(Number);
+            return new Date(y, mo - 1, d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+        }
+
+        let editingTestId = null;
+
+        function openTestsModal() {
+            const data = getActiveData();
+            if (!data) return;
+            getTests(data);
+            resetTestForm();
+            renderTestsList();
+            document.getElementById('testsExportMode').value = getMatric(data).exportMode;
+            openOverlay('testsModal');
+            setTimeout(() => { const el = document.getElementById('tSubject'); if (el) el.focus(); }, 60);
+        }
+        function closeTestsModal() { closeOverlay('testsModal'); }
+
+        // keepDefaults: after adding one test, keep type/date/times so the next
+        // entry on the same day is two fields away.
+        function resetTestForm(keepDefaults) {
+            editingTestId = null;
+            document.getElementById('tSubject').value = '';
+            if (!keepDefaults) {
+                document.getElementById('tKind').value = 'Test';
+                document.getElementById('tDate').value = '';
+                document.getElementById('tStart').value = '';
+                document.getElementById('tEnd').value = '';
+            }
+            document.getElementById('tSaveBtn').innerText = 'Add test';
+            document.getElementById('tCancelEdit').style.display = 'none';
+        }
+
+        function saveTestEntry() {
+            const data = getActiveData();
+            if (!data) return;
+            const subject = document.getElementById('tSubject').value.trim();
+            const kind = document.getElementById('tKind').value || 'Test';
+            const date = document.getElementById('tDate').value;
+            const startRaw = document.getElementById('tStart').value.trim();
+            const endRaw = document.getElementById('tEnd').value.trim();
+
+            if (!subject) { showDialog('Missing subject', 'Give the test a name, e.g. "Maths test".', false); return; }
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { showDialog('Missing date', 'Pick the date of the test.', false); return; }
+            const ps = parseTimeString(startRaw || '08h00');
+            if (!ps) { showDialog('Invalid time', 'Start time should look like 08h00 or 8:30.', false); return; }
+            let pe = endRaw ? parseTimeString(endRaw) : null;
+            if (endRaw && !pe) { showDialog('Invalid time', 'End time should look like 09h00 or 9:30.', false); return; }
+            if (!pe) { const total = ps.h * 60 + ps.m + 60; pe = { h: Math.min(23, Math.floor(total / 60)), m: total % 60 }; }
+            if (pe.h * 60 + pe.m <= ps.h * 60 + ps.m) { showDialog('Invalid time', 'End time must be after the start time.', false); return; }
+
+            const list = getTests(data);
+            const entry = { id: editingTestId || ('tst_' + Date.now() + '_' + Math.floor(Math.random() * 100000)), subject, kind, date, start: hhmm(ps), end: hhmm(pe) };
+            const idx = editingTestId ? list.findIndex(t => t.id === editingTestId) : -1;
+            if (idx >= 0) list[idx] = entry; else list.push(entry);
+            sortTests(list);
+
+            const wasEdit = !!editingTestId;
+            triggerSave(); renderEvents(); renderTestsList();
+            resetTestForm(!wasEdit);
+            showToast(wasEdit ? 'Test updated' : `Added ${kind.toLowerCase()}: ${subject} · ${prettyDate(date)}`);
+            if (!wasEdit) document.getElementById('tSubject').focus();
+        }
+
+        function editTestEntry(id) {
+            const data = getActiveData();
+            if (!data) return;
+            const t = getTests(data).find(x => x.id === id);
+            if (!t) return;
+            editingTestId = id;
+            document.getElementById('tSubject').value = t.subject;
+            document.getElementById('tKind').value = t.kind || 'Test';
+            document.getElementById('tDate').value = t.date;
+            document.getElementById('tStart').value = t.start.replace(':', 'h');
+            document.getElementById('tEnd').value = t.end.replace(':', 'h');
+            document.getElementById('tSaveBtn').innerText = 'Save changes';
+            document.getElementById('tCancelEdit').style.display = 'inline-block';
+            document.getElementById('tSubject').focus();
+        }
+
+        function deleteTestEntry(id) {
+            const data = getActiveData();
+            if (!data) return;
+            const list = getTests(data);
+            const idx = list.findIndex(x => x.id === id);
+            if (idx < 0) return;
+            const removed = list.splice(idx, 1)[0];
+            if (editingTestId === id) resetTestForm();
+            triggerSave(); renderEvents(); renderTestsList();
+            showToast(`Removed ${removed.subject}`, () => {
+                const d = getActiveData();
+                if (!d) return;
+                getTests(d).push(removed); sortTests(d.tests);
+                triggerSave(); renderEvents(); renderTestsList();
+            });
+        }
+
+        function renderTestsList() {
+            const data = getActiveData();
+            const upEl = document.getElementById('testsList');
+            const pastEl = document.getElementById('testsListPast');
+            const countEl = document.getElementById('testsCount');
+            if (!upEl || !pastEl) return;
+            const list = data ? sortTests(getTests(data)) : [];
+            const today = todayISO();
+            const item = (t, past) => `
+                <div class="test-item${past ? ' is-past' : ''}">
+                    <div class="test-meta">
+                        <span class="test-when">${prettyDate(t.date)} · ${t.start.replace(':', 'h')} - ${t.end.replace(':', 'h')}</span>
+                        <span class="test-name">${escapeHtml(t.kind || 'Test')} · ${escapeHtml(t.subject)}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="item-edit" onclick="editTestEntry('${t.id}')">Edit</button>
+                        <button class="item-delete" onclick="deleteTestEntry('${t.id}')">Delete</button>
+                    </div>
+                </div>`;
+            const up = list.filter(t => t.date >= today);
+            const past = list.filter(t => t.date < today).reverse();
+            upEl.innerHTML = up.length ? up.map(t => item(t, false)).join('') : '<div class="tests-empty">No upcoming tests yet. Add the term\'s dates above.</div>';
+            pastEl.innerHTML = past.length ? past.map(t => item(t, true)).join('') : '<div class="tests-empty">None</div>';
+            if (countEl) countEl.innerText = up.length ? `(${up.length})` : '';
         }
 
         // --- Save System ---
@@ -3409,11 +3694,11 @@
                 if (clash) {
                     clashCount++;
                     div.classList.add('event-clash');
-                    div.title = `Clashes with matric exam: ${clash.label} (${fmtMin(clash.startMin)} - ${fmtMin(clash.endMin)})`;
+                    div.title = `Clashes with ${clash.kind === 'test' ? (clash.kindLabel || 'test').toLowerCase() : 'matric exam'}: ${clash.label} (${fmtMin(clash.startMin)} - ${fmtMin(clash.endMin)})`;
                 }
 
                 let contentHTML = `<span class="event-delete" onclick="deleteEvent('${ev.id}'); event.stopPropagation();">×</span>`;
-                if (clash) contentHTML += `<span class="clash-badge" data-html2canvas-ignore="true">⚠ Exam clash</span>`;
+                if (clash) contentHTML += `<span class="clash-badge" data-html2canvas-ignore="true">⚠ ${clash.kind === 'test' ? 'Test' : 'Exam'} clash</span>`;
                 let tutorHTML = ev.tutor ? `<span>${ev.tutor}</span>` : '';
                 let locHTML = ev.location ? `<span style="font-style: italic; opacity: 0.9;">${ev.location}</span>` : '';
 
@@ -3897,6 +4182,7 @@
                 endHour: student.endHour,
                 showWeekends: student.showWeekends,
                 matric: student.matric ? JSON.parse(JSON.stringify(student.matric)) : null,
+                tests: deepCopyEvents(student.tests),
                 events: deepCopyEvents(student.events)
             };
         }
@@ -3993,6 +4279,7 @@
                 data.endHour = snap.endHour;
                 data.showWeekends = snap.showWeekends;
                 if (snap.matric) data.matric = JSON.parse(JSON.stringify(snap.matric));
+                if (Array.isArray(snap.tests)) data.tests = deepCopyEvents(snap.tests);
                 data.events = (snap.events || []).map(e => {
                     const copy = Object.assign({}, e);
                     copy.id = 'evt_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
