@@ -1604,15 +1604,14 @@
 
         .so-card { background: #1b2029; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 9px 10px; margin-bottom: 8px; }
         .so-card.is-active { border-color: rgba(212,175,55,0.65); }
-        .so-card.has-change { border-color: rgba(255,152,0,0.6); }
         .so-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
         .so-card:not(.is-sent) .so-head { cursor: pointer; }
         .so-name { font-weight: 700; font-size: 0.85rem; color: #f5f6f8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .so-prog { font-size: 0.66rem; font-weight: 800; color: #8a909b; background: #232a35; padding: 1px 7px; border-radius: 10px; flex-shrink: 0; }
         .so-prog.so-ok { color: #14181f; background: var(--accent-gold); }
         .so-week { font-size: 0.66rem; color: #8a909b; margin: 2px 0 7px; font-weight: 600; }
-        .so-flag { color: #ffb74d; }
         .so-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .so-grid .so-chip:last-child:nth-child(odd) { grid-column: 1 / -1; }
         .so-chip {
             padding: 5px 6px; font-size: 0.62rem; font-weight: 600; border-radius: 4px; width: 100%;
             background: #232a35; color: #b8bcc4; border: 1px solid rgba(255,255,255,0.08);
@@ -1621,15 +1620,6 @@
         .so-chip:hover { background: #2a313c; color: #f5f6f8; }
         .so-chip.on { background: var(--accent-gold); color: #14181f; border-color: var(--accent-gold); }
         .so-chip.on:hover { background: #e6c14d; color: #14181f; }
-        .so-chip.so-change.on { background: #ff9800; border-color: #ff9800; color: #14181f; }
-        .so-pair { display: flex; gap: 3px; min-width: 0; grid-column: 1 / -1; }
-        .so-pair .so-chip { flex: 1 1 auto; min-width: 0; }
-        .so-note {
-            flex: 0 0 22px; padding: 0; font-size: 0.7rem; font-weight: 800; border-radius: 4px;
-            background: #232a35; color: #8a909b; border: 1px solid rgba(255,255,255,0.08);
-        }
-        .so-note:hover { color: #f5f6f8; }
-        .so-note.has-note { background: #ffb74d; color: #14181f; border-color: #ffb74d; }
         .so-actions { display: flex; justify-content: flex-end; }
         .so-actions button { padding: 4px 10px; font-size: 0.7rem; }
 
@@ -1640,7 +1630,6 @@
         body.girly-pop .so-name { color: #7a1f55; }
         body.girly-pop .so-chip { background: #ffd1ec; color: #b3046a; border-color: #ffb3de; }
         body.girly-pop .so-chip.on { background: #e60073; color: #fff; border-color: #e60073; }
-        body.girly-pop .so-note { background: #ffd1ec; color: #b3046a; border-color: #ffb3de; }
         body.girly-pop .so-prog { background: #ffd1ec; color: #b3046a; }
         body.girly-pop .so-prog.so-ok { background: #e60073; color: #fff; }
     </style>
@@ -2195,19 +2184,6 @@
         </div>
     </div>
 
-    <!-- Sign-off change note -->
-    <div class="modal-overlay" id="signoffNoteModal" data-html2canvas-ignore="true" style="z-index: 1500;">
-        <div class="modal">
-            <h3 id="signoffNoteTitle">Change note</h3>
-            <label>What changed?</label>
-            <input type="text" id="signoffNoteInput" placeholder="e.g. Can't do Tuesday 17h00 anymore">
-            <div class="btn-group" style="justify-content: flex-end; width: 100%;">
-                <button style="background:#ccc; color:#333;" onclick="closeSignoffNote()">Cancel</button>
-                <button class="btn-primary" onclick="saveSignoffNote()">Save note</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Toast (with optional Undo) -->
     <div id="toast" data-html2canvas-ignore="true">
         <span id="toastMsg"></span>
@@ -2342,9 +2318,6 @@
         window.editTestEntry = editTestEntry;
         window.deleteTestEntry = deleteTestEntry;
         window.toggleSignoff = toggleSignoff;
-        window.editSignoffNote = editSignoffNote;
-        window.saveSignoffNote = saveSignoffNote;
-        window.closeSignoffNote = closeSignoffNote;
         window.reopenAllSent = reopenAllSent;
 
         // Data Helpers
@@ -3238,8 +3211,6 @@
             { key: 'sentPD',        label: 'Sent → P&D' },
             { key: 'agreedStudent', label: 'Agreed: student', agree: true },
             { key: 'agreedTutors',  label: 'Agreed: tutors',  agree: true },
-            { key: 'changeStudent', label: 'Change: student', change: true },
-            { key: 'changeTutors',  label: 'Change: tutors',  change: true },
             { key: 'sentGCG',       label: 'Sent → GCG' }
         ];
         // When all of these are ticked the schedule moves to "Sent this week".
@@ -3279,25 +3250,18 @@
                 activeCount++;
                 const w = getSignoff(s, false);
                 const done = SIGNOFF_DONE_KEYS.filter(k => w[k]).length;
-                const hasChange = !!(w.changeStudent || w.changeTutors);
                 const chips = SIGNOFF_STEPS.map(st => {
                     const on = !!w[st.key];
                     const tip = on && w[st.key + 'At'] ? `Ticked ${formatTimestamp(w[st.key + 'At'])} — click to untick` : st.label;
-                    let c = `<button type="button" class="so-chip${on ? ' on' : ''}${st.change ? ' so-change' : ''}${st.agree ? ' so-agree' : ''}" onclick="toggleSignoff('${id}','${st.key}')" title="${escapeHtml(tip)}">${on ? '✓ ' : ''}${st.label}</button>`;
-                    if (st.change) {
-                        const note = w.notes[st.key] || '';
-                        c += `<button type="button" class="so-note${note ? ' has-note' : ''}" title="${note ? escapeHtml(note) : 'Add a note about the change'}" onclick="editSignoffNote('${id}','${st.key}')">?</button>`;
-                        return `<span class="so-pair">${c}</span>`;
-                    }
-                    return c;
+                    return `<button type="button" class="so-chip${on ? ' on' : ''}${st.agree ? ' so-agree' : ''}" onclick="toggleSignoff('${id}','${st.key}')" title="${escapeHtml(tip)}">${on ? '✓ ' : ''}${st.label}</button>`;
                 }).join('');
                 html += `
-                    <div class="so-card${id === activeId ? ' is-active' : ''}${hasChange ? ' has-change' : ''}">
+                    <div class="so-card${id === activeId ? ' is-active' : ''}">
                         <div class="so-head" onclick="switchTab('${id}')" title="Open this schedule">
                             <span class="so-name">${escapeHtml(s.name || 'Unnamed')}</span>
                             <span class="so-prog" title="Agreed by student + agreed by tutors + sent to GCG">${done}/${SIGNOFF_DONE_KEYS.length}</span>
                         </div>
-                        <div class="so-week">${weekLabel(s)}${hasChange ? ' · <span class="so-flag">changes pending</span>' : ''}</div>
+                        <div class="so-week">${weekLabel(s)}</div>
                         <div class="so-grid">${chips}</div>
                     </div>`;
             });
@@ -3348,36 +3312,6 @@
                 });
             }
         }
-
-        let _signoffNoteTarget = null;
-        function editSignoffNote(id, key) {
-            const s = personalData.students[id];
-            if (!s) return;
-            const w = getSignoff(s);
-            const step = SIGNOFF_STEPS.find(x => x.key === key);
-            _signoffNoteTarget = { id, key };
-            document.getElementById('signoffNoteTitle').innerText = `${s.name || 'Student'} · ${step ? step.label : 'Change'}`;
-            document.getElementById('signoffNoteInput').value = w.notes[key] || '';
-            openOverlay('signoffNoteModal');
-            setTimeout(() => document.getElementById('signoffNoteInput').focus(), 60);
-        }
-        function saveSignoffNote() {
-            if (!_signoffNoteTarget) return;
-            const { id, key } = _signoffNoteTarget;
-            const s = personalData.students[id];
-            if (!s) { closeSignoffNote(); return; }
-            const w = getSignoff(s);
-            const val = document.getElementById('signoffNoteInput').value.trim();
-            w.notes[key] = val;
-            // Writing a note implies the change is real: tick the flag too.
-            if (val && !w[key]) { w[key] = true; w[key + 'At'] = Date.now(); }
-            triggerSave(); renderSidePanels(); closeSignoffNote();
-        }
-        function closeSignoffNote() { _signoffNoteTarget = null; closeOverlay('signoffNoteModal'); }
-        document.getElementById('signoffNoteInput').addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') saveSignoffNote();
-            if (e.key === 'Escape') closeSignoffNote();
-        });
 
         function reopenAllSent() {
             const students = (personalData && personalData.students) ? personalData.students : {};
