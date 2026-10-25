@@ -1574,6 +1574,75 @@
         body.girly-pop .test-item { background: #ffe9f5; color: #7a1f55; }
         body.girly-pop .test-item .test-when { color: #b3046a; }
         body.girly-pop .item-edit { background: #e60073; color: #fff; }
+
+        /* ============================================== */
+        /* ===== WEEKLY SIGN-OFF SIDE PANELS         ===== */
+        /* ===== wide screens only (laptop/desktop)  ===== */
+        /* ============================================== */
+        .side-panel { display: none; }
+        @media (min-width: 1480px) {
+            .side-panel {
+                display: flex; flex-direction: column;
+                position: fixed; top: 20px; bottom: 20px; width: 270px; z-index: 50;
+                background: #14181f; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.45); overflow: hidden;
+            }
+            /* The 900px card is centred; sit 20px outside its edges. */
+            .side-left  { left:  max(20px, calc(50% - 450px - 290px)); }
+            .side-right { right: max(20px, calc(50% - 450px - 290px)); }
+        }
+        .side-head {
+            padding: 14px 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+        }
+        .side-head h4 { margin: 0; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-gold); }
+        .side-sub { font-size: 0.68rem; color: #8a909b; font-weight: 600; white-space: nowrap; }
+        .side-body { padding: 10px; overflow-y: auto; flex: 1; }
+        .side-foot { padding: 8px 10px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: flex-end; }
+        .side-foot button { padding: 6px 10px; font-size: 0.72rem; }
+        .side-empty { color: #8a909b; font-size: 0.76rem; padding: 8px; line-height: 1.45; }
+
+        .so-card { background: #1b2029; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 9px 10px; margin-bottom: 8px; }
+        .so-card.is-active { border-color: rgba(212,175,55,0.65); }
+        .so-card.has-change { border-color: rgba(255,152,0,0.6); }
+        .so-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+        .so-card:not(.is-sent) .so-head { cursor: pointer; }
+        .so-name { font-weight: 700; font-size: 0.85rem; color: #f5f6f8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .so-prog { font-size: 0.66rem; font-weight: 800; color: #8a909b; background: #232a35; padding: 1px 7px; border-radius: 10px; flex-shrink: 0; }
+        .so-prog.so-ok { color: #14181f; background: var(--accent-gold); }
+        .so-week { font-size: 0.66rem; color: #8a909b; margin: 2px 0 7px; font-weight: 600; }
+        .so-flag { color: #ffb74d; }
+        .so-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .so-chip {
+            padding: 5px 6px; font-size: 0.62rem; font-weight: 600; border-radius: 4px; width: 100%;
+            background: #232a35; color: #b8bcc4; border: 1px solid rgba(255,255,255,0.08);
+            text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .so-chip:hover { background: #2a313c; color: #f5f6f8; }
+        .so-chip.on { background: var(--accent-gold); color: #14181f; border-color: var(--accent-gold); }
+        .so-chip.on:hover { background: #e6c14d; color: #14181f; }
+        .so-chip.so-change.on { background: #ff9800; border-color: #ff9800; color: #14181f; }
+        .so-pair { display: flex; gap: 3px; min-width: 0; grid-column: 1 / -1; }
+        .so-pair .so-chip { flex: 1 1 auto; min-width: 0; }
+        .so-note {
+            flex: 0 0 22px; padding: 0; font-size: 0.7rem; font-weight: 800; border-radius: 4px;
+            background: #232a35; color: #8a909b; border: 1px solid rgba(255,255,255,0.08);
+        }
+        .so-note:hover { color: #f5f6f8; }
+        .so-note.has-note { background: #ffb74d; color: #14181f; border-color: #ffb74d; }
+        .so-actions { display: flex; justify-content: flex-end; }
+        .so-actions button { padding: 4px 10px; font-size: 0.7rem; }
+
+        body.girly-pop .side-panel { background: #fff5fa; border-color: #ffb3de; }
+        body.girly-pop .side-head { border-color: #ffb3de; }
+        body.girly-pop .side-head h4 { color: #e60073; }
+        body.girly-pop .so-card { background: #ffe9f5; border-color: #ffb3de; }
+        body.girly-pop .so-name { color: #7a1f55; }
+        body.girly-pop .so-chip { background: #ffd1ec; color: #b3046a; border-color: #ffb3de; }
+        body.girly-pop .so-chip.on { background: #e60073; color: #fff; border-color: #e60073; }
+        body.girly-pop .so-note { background: #ffd1ec; color: #b3046a; border-color: #ffb3de; }
+        body.girly-pop .so-prog { background: #ffd1ec; color: #b3046a; }
+        body.girly-pop .so-prog.so-ok { background: #e60073; color: #fff; }
     </style>
 </head>
 <body class="intro-running">
@@ -1756,6 +1825,17 @@
         })();
     </script>
     <!-- ============================== -->
+
+    <!-- Weekly sign-off panels: shown only on wide screens (see .side-panel CSS) -->
+    <aside id="panelSignoff" class="side-panel side-left" data-html2canvas-ignore="true">
+        <div class="side-head"><h4>Week sign-off</h4><span id="signoffSummary" class="side-sub"></span></div>
+        <div id="signoffList" class="side-body"></div>
+    </aside>
+    <aside id="panelSent" class="side-panel side-right" data-html2canvas-ignore="true">
+        <div class="side-head"><h4>Sent this week</h4><span id="sentSummary" class="side-sub"></span></div>
+        <div id="sentList" class="side-body"></div>
+        <div class="side-foot"><button type="button" id="btnReopenAll" class="btn-secondary" style="display:none;" onclick="reopenAllSent()">↻ Reopen all for next week</button></div>
+    </aside>
 
     <div class="tab-container" id="tabsContainer" data-html2canvas-ignore="true"></div>
 
@@ -2115,6 +2195,19 @@
         </div>
     </div>
 
+    <!-- Sign-off change note -->
+    <div class="modal-overlay" id="signoffNoteModal" data-html2canvas-ignore="true" style="z-index: 1500;">
+        <div class="modal">
+            <h3 id="signoffNoteTitle">Change note</h3>
+            <label>What changed?</label>
+            <input type="text" id="signoffNoteInput" placeholder="e.g. Can't do Tuesday 17h00 anymore">
+            <div class="btn-group" style="justify-content: flex-end; width: 100%;">
+                <button style="background:#ccc; color:#333;" onclick="closeSignoffNote()">Cancel</button>
+                <button class="btn-primary" onclick="saveSignoffNote()">Save note</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast (with optional Undo) -->
     <div id="toast" data-html2canvas-ignore="true">
         <span id="toastMsg"></span>
@@ -2248,6 +2341,11 @@
         window.resetTestForm = resetTestForm;
         window.editTestEntry = editTestEntry;
         window.deleteTestEntry = deleteTestEntry;
+        window.toggleSignoff = toggleSignoff;
+        window.editSignoffNote = editSignoffNote;
+        window.saveSignoffNote = saveSignoffNote;
+        window.closeSignoffNote = closeSignoffNote;
+        window.reopenAllSent = reopenAllSent;
 
         // Data Helpers
         function getMySchedules() {
@@ -2300,6 +2398,13 @@
                 if (typeof s.theme === 'undefined' || s.theme === null) s.theme = 'none';
                 getMatric(s); // normalise matric overlay settings
                 getTests(s);  // normalise per-student test dates
+                if (!s.workflow || typeof s.workflow !== 'object') s.workflow = {};
+                Object.keys(s.workflow).forEach(k => {
+                    const w = s.workflow[k];
+                    const hasTick = w && Object.keys(w).some(f => f !== 'notes' && !!w[f]);
+                    const hasNote = w && w.notes && Object.values(w.notes).some(Boolean);
+                    if (!hasTick && !hasNote) delete s.workflow[k];
+                });
             });
             return dataObj;
         }
@@ -3121,6 +3226,172 @@
             if (countEl) countEl.innerText = up.length ? `(${up.length})` : '';
         }
 
+        // ================================================
+        // ===== WEEKLY SIGN-OFF PANELS (wide screens) =====
+        // ================================================
+        // Left panel: every active student with the week's sign-off steps.
+        // Right panel: schedules already marked 'sent'. Ticks are stored on the
+        // student under data.workflow[<Monday of their week>], so each week
+        // starts clean and switching the date back shows that week's ticks.
+        const SIGNOFF_STEPS = [
+            { key: 'sentStudent',   label: 'Sent → student' },
+            { key: 'sentPD',        label: 'Sent → P&D' },
+            { key: 'agreedStudent', label: 'Agreed: student', agree: true },
+            { key: 'agreedTutors',  label: 'Agreed: tutors',  agree: true },
+            { key: 'changeStudent', label: 'Change: student', change: true },
+            { key: 'changeTutors',  label: 'Change: tutors',  change: true },
+            { key: 'sentGCG',       label: 'Sent → GCG' }
+        ];
+        // When all of these are ticked the schedule moves to "Sent this week".
+        const SIGNOFF_DONE_KEYS = ['agreedStudent', 'agreedTutors', 'sentGCG'];
+
+        function weekKeyFor(student) { const mon = weekMonday(student.date); return mon ? isoLocal(mon) : 'no-week'; }
+        function weekLabel(student) {
+            const mon = weekMonday(student.date);
+            return mon ? 'Wk ' + mon.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'No week set';
+        }
+        // create=false returns a throwaway record when nothing is stored yet, so
+        // merely rendering the panel never writes empty weeks into the data.
+        function getSignoff(student, create = true) {
+            if (!student.workflow || typeof student.workflow !== 'object') student.workflow = {};
+            const k = weekKeyFor(student);
+            let w = student.workflow[k];
+            if (!w || typeof w !== 'object') {
+                w = { notes: {} };
+                if (create) student.workflow[k] = w;
+            }
+            if (!w.notes || typeof w.notes !== 'object') w.notes = {};
+            return w;
+        }
+        function signoffDone(w) { return SIGNOFF_DONE_KEYS.every(k => !!w[k]); }
+
+        function renderSidePanels() {
+            const list = document.getElementById('signoffList');
+            const sentList = document.getElementById('sentList');
+            if (!list || !sentList) return;
+            const students = (personalData && personalData.students) ? personalData.students : {};
+            const activeId = personalData.activeTab;
+
+            let activeCount = 0, html = '';
+            Object.keys(students).forEach(id => {
+                const s = students[id];
+                if (!s || (s.status && s.status !== 'active')) return;
+                activeCount++;
+                const w = getSignoff(s, false);
+                const done = SIGNOFF_DONE_KEYS.filter(k => w[k]).length;
+                const hasChange = !!(w.changeStudent || w.changeTutors);
+                const chips = SIGNOFF_STEPS.map(st => {
+                    const on = !!w[st.key];
+                    const tip = on && w[st.key + 'At'] ? `Ticked ${formatTimestamp(w[st.key + 'At'])} — click to untick` : st.label;
+                    let c = `<button type="button" class="so-chip${on ? ' on' : ''}${st.change ? ' so-change' : ''}${st.agree ? ' so-agree' : ''}" onclick="toggleSignoff('${id}','${st.key}')" title="${escapeHtml(tip)}">${on ? '✓ ' : ''}${st.label}</button>`;
+                    if (st.change) {
+                        const note = w.notes[st.key] || '';
+                        c += `<button type="button" class="so-note${note ? ' has-note' : ''}" title="${note ? escapeHtml(note) : 'Add a note about the change'}" onclick="editSignoffNote('${id}','${st.key}')">?</button>`;
+                        return `<span class="so-pair">${c}</span>`;
+                    }
+                    return c;
+                }).join('');
+                html += `
+                    <div class="so-card${id === activeId ? ' is-active' : ''}${hasChange ? ' has-change' : ''}">
+                        <div class="so-head" onclick="switchTab('${id}')" title="Open this schedule">
+                            <span class="so-name">${escapeHtml(s.name || 'Unnamed')}</span>
+                            <span class="so-prog" title="Agreed by student + agreed by tutors + sent to GCG">${done}/${SIGNOFF_DONE_KEYS.length}</span>
+                        </div>
+                        <div class="so-week">${weekLabel(s)}${hasChange ? ' · <span class="so-flag">changes pending</span>' : ''}</div>
+                        <div class="so-grid">${chips}</div>
+                    </div>`;
+            });
+            list.innerHTML = html || '<div class="side-empty">No active schedules.</div>';
+            const sum = document.getElementById('signoffSummary');
+            if (sum) sum.innerText = activeCount ? `${activeCount} in progress` : '';
+
+            let sentHtml = '', sentCount = 0;
+            Object.keys(students)
+                .sort((a, b) => (students[b].sentAt || 0) - (students[a].sentAt || 0))
+                .forEach(id => {
+                    const s = students[id];
+                    if (!s || s.status !== 'sent') return;
+                    sentCount++;
+                    sentHtml += `
+                        <div class="so-card is-sent">
+                            <div class="so-head"><span class="so-name">${escapeHtml(s.name || 'Unnamed')}</span><span class="so-prog so-ok">✓</span></div>
+                            <div class="so-week">${weekLabel(s)}${s.sentAt ? ' · sent ' + formatTimestamp(s.sentAt) : ''}</div>
+                            <div class="so-actions"><button type="button" class="item-reopen" onclick="reopenSchedule('${id}')">Reopen</button></div>
+                        </div>`;
+                });
+            sentList.innerHTML = sentHtml || '<div class="side-empty">Nothing sent yet this week. A schedule lands here once it is agreed by the student, agreed by the tutors and sent to GCG.</div>';
+            const sentSum = document.getElementById('sentSummary');
+            if (sentSum) sentSum.innerText = sentCount ? `${sentCount} done` : '';
+            const reopenAll = document.getElementById('btnReopenAll');
+            if (reopenAll) reopenAll.style.display = sentCount ? 'inline-block' : 'none';
+        }
+
+        function toggleSignoff(id, key) {
+            const s = personalData.students[id];
+            if (!s) return;
+            const w = getSignoff(s);
+            w[key] = !w[key];
+            w[key + 'At'] = w[key] ? Date.now() : null;
+            triggerSave();
+            renderSidePanels();
+
+            if (w[key] && signoffDone(w) && (!s.status || s.status === 'active')) {
+                s.status = 'sent';
+                s.sentAt = Date.now();
+                if (personalData.activeTab === id) personalData.activeTab = firstActivePersonalId();
+                triggerSave(); renderTabs(); loadActiveStudentData();
+                showToast(`${s.name || 'Student'} moved to Sent this week`, () => {
+                    s.status = 'active'; s.sentAt = null;
+                    w[key] = false; w[key + 'At'] = null;
+                    personalData.activeTab = id;
+                    triggerSave(); renderTabs(); loadActiveStudentData();
+                });
+            }
+        }
+
+        let _signoffNoteTarget = null;
+        function editSignoffNote(id, key) {
+            const s = personalData.students[id];
+            if (!s) return;
+            const w = getSignoff(s);
+            const step = SIGNOFF_STEPS.find(x => x.key === key);
+            _signoffNoteTarget = { id, key };
+            document.getElementById('signoffNoteTitle').innerText = `${s.name || 'Student'} · ${step ? step.label : 'Change'}`;
+            document.getElementById('signoffNoteInput').value = w.notes[key] || '';
+            openOverlay('signoffNoteModal');
+            setTimeout(() => document.getElementById('signoffNoteInput').focus(), 60);
+        }
+        function saveSignoffNote() {
+            if (!_signoffNoteTarget) return;
+            const { id, key } = _signoffNoteTarget;
+            const s = personalData.students[id];
+            if (!s) { closeSignoffNote(); return; }
+            const w = getSignoff(s);
+            const val = document.getElementById('signoffNoteInput').value.trim();
+            w.notes[key] = val;
+            // Writing a note implies the change is real: tick the flag too.
+            if (val && !w[key]) { w[key] = true; w[key + 'At'] = Date.now(); }
+            triggerSave(); renderSidePanels(); closeSignoffNote();
+        }
+        function closeSignoffNote() { _signoffNoteTarget = null; closeOverlay('signoffNoteModal'); }
+        document.getElementById('signoffNoteInput').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') saveSignoffNote();
+            if (e.key === 'Escape') closeSignoffNote();
+        });
+
+        function reopenAllSent() {
+            const students = (personalData && personalData.students) ? personalData.students : {};
+            const ids = Object.keys(students).filter(id => students[id].status === 'sent');
+            if (!ids.length) return;
+            showDialog('Reopen all', `Move ${ids.length} sent schedule${ids.length === 1 ? '' : 's'} back to your active tabs for next week?`, true, (ok) => {
+                if (!ok) return;
+                ids.forEach(id => { students[id].status = 'active'; });
+                if (!personalData.activeTab || !students[personalData.activeTab] || students[personalData.activeTab].status !== 'active') personalData.activeTab = ids[0];
+                triggerSave(); renderTabs(); loadActiveStudentData();
+                showToast('Sent schedules reopened');
+            });
+        }
+
         // --- Save System ---
         async function triggerSave() {
             let activeId = getActiveTabId();
@@ -3204,6 +3475,7 @@
             rail.className = 'tab-rail is-instant';
             container.appendChild(rail);
             nextFrame(() => positionTabRail(true));
+            renderSidePanels();
         }
 
         // Slides the gold rail under whichever tab is active. `instant` skips
@@ -3371,6 +3643,7 @@
         function loadActiveStudentData() {
             ensureActiveTabIsActive();
             updateArchiveCount();
+            renderSidePanels();
             const data = getActiveData();
             const ownerTag = document.getElementById('outOwner');
             const emptyOverlay = document.getElementById('emptyOverlay');
@@ -4072,6 +4345,7 @@
 
             const prevStatus = student.status || 'active';
             student.status = newStatus;
+            if (newStatus === 'sent') student.sentAt = Date.now();
             triggerSave();
             // Move off this tab since it's no longer active
             personalData.activeTab = firstActivePersonalId();
